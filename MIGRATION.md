@@ -40,6 +40,8 @@ OTG/
     public/pacs/**                    # REAL PACS jpgs (gitignored, ~190MB, served /pacs/...)
     public/manifest.sample.json       # synthetic fallback (committed; SVG placeholder tiles)
     vite.config.ts                    # server.watch.ignored: public/pacs (see Gotchas)
+  server/                             # multi-annotator Review API (FastAPI, 127.0.0.1:8787)
+    app.py  requirements.txt          # share codes; per-annotator files under server/data/ (gitignored)
   pipeline/
     build_real_manifest.py            # DONE-run: PACS → web/public/pacs + manifest.json (metadata only)
     splits.py                         # stratified per-(domain,class) 80/10/10 split
@@ -78,6 +80,13 @@ lower count than when saved). CSV = one row per (anchor, selection) with `select
 `n_selections`/`picked_at`; HF parquet likewise (`pair_id = gameId#puzzleIndex#p<position>`).
 Player choices never touch the seeded RNG ⇒ algoVersion stays 1 and old seeds replay unchanged.
 
+**ReviewerAnnotation (multi-annotator, additive)**: `{puzzleIndex, comment, at, annotator?,
+revealedAt?}` — `annotator` names who wrote it; `revealedAt` (shared mode) is when that annotator
+revealed the puzzle's responses (`null` ⇒ never revealed; `comment.at < revealedAt` ⇒ the comment
+was written blind). Server-side, each annotator's comments live in
+`server/data/<CODE>/annotations/<user>.json` (usernames case-insensitive), the uploaded game is
+never mutated, and `GET /api/games/<code>/export` returns the merged attributed record.
+
 ## Key decisions
 - **Reproducibility:** one seeded mulberry32 RNG per game; `generateRound()` is the *single* draw path
   used by both Play and `verifyGame`/`resumeGame` — so seed + manifest reproduces a game exactly.
@@ -101,10 +110,19 @@ Player choices never touch the seeded RNG ⇒ algoVersion stays 1 and old seeds 
   overall/avg/median timing; player note + "Flag for review"; per-submit screenshot (all picks
   ringed); JSON/CSV + Screenshots PDF; **Load game** (resume a saved v2/v3 JSON — replays RNG to
   continue seamlessly; screenshots not restored). Submit tolerates rAF-throttled background tabs.
-- **Review:** load JSON; numbered grid, red-bordered pick, player note; **reviewer comments** with
+- **Review:** load JSON; numbered grid, red-bordered picks, player note; **reviewer comments** with
   **crash-safe auto-save** (File System Access API, Chromium) via "Submit comment"; **seed-verify**;
   **filters** (AND-combined: No-good / Flagged / Player-commented + class / anchor-domain /
   selected-domain dropdowns + choice-time range); Annotation PDF; Save annotated JSON.
+- **Shared multi-annotator Review (2026-07-14):** run `server/app.py` (or `npm run api`), then
+  "Share for annotators…" → 6-char code; others "Join with a code" + username (persisted in
+  localStorage, case-insensitive identity). Per-puzzle **annotator blindness**: selections + player
+  note/flag + other annotators' comments hidden until "Show responses" (permanent, timestamped,
+  stored with the annotator's comments — blind vs post-reveal comments are distinguishable);
+  the four leaky filters are disabled in shared mode; comments persist server-side per annotator
+  (async-independent by construction); rejoin restores comments + reveal state; exports (JSON/PDF)
+  merge all annotators, attributed. LAN: `npm run dev -- --host`, share the Vite URL (`/api`
+  proxies to the local server). Blindness is honest-path only (lab-trust; no auth).
 - **Phase 0 (real PACS):** 9,991 images on disk (photo 1670 / art 2048 / cartoon 2344 / sketch 3929),
   80/10/10 split (train 7993), min 64 train/cell.
 - **PACS Analyzer (2026-07-13):** 42-triplet overview heat-colored by mean CLIP cosine (train pairs;

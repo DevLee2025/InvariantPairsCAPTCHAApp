@@ -13,14 +13,16 @@ manifest schema, selection modes, session/quota model, data schemas, UI, roadmap
 
 ```
 OTG/
-  SPEC.md        ← authoritative spec
+  SPEC.md        ← original spec (see MIGRATION.md for what supersedes it)
+  MIGRATION.md   ← current-state snapshot (data contracts, status, gotchas)
   README.md      ← this file
-  web/           ← React + Vite + TypeScript front-end (the game)
-  pipeline/      ← Python Phase-0 pipeline (PACS → CLIP/ERM/mixture probes → manifest → CDN)
+  web/           ← React + Vite + TypeScript front-end (Play / Review / Analyzer)
+  pipeline/      ← Python pipeline (PACS → CLIP/ERM/mixture probes → manifest; HF export)
+  server/        ← FastAPI multi-annotator Review API (share codes; optional)
 ```
 
-The front-end depends only on a static `manifest.json` + image CDN URLs — never on Python at
-runtime. The pipeline produces that manifest offline.
+The front-end depends only on a static `manifest.json` + local images at runtime; the optional
+annotation server enables the shared multi-annotator Review mode.
 
 ## Build the real PACS data (once)
 
@@ -50,12 +52,33 @@ npm run dev      # http://localhost:5173
 The front-end loads `/manifest.json` (real PACS) if present, else falls back to the committed
 synthetic dev manifest (`web/public/manifest.sample.json`, placeholder SVG tiles) so it always runs.
 
-- Top-level **Play / Review** views. Play: pick the option most similar to the anchor → saves an
-  invariant pair; grid 2×2–8×8; seeded + replayable; per-pick screenshots; JSON/CSV + screenshots PDF.
-  Review: load a saved game JSON, inspect picks (numbered, red-bordered), add reviewer comments,
-  verify the seed, export an annotation PDF / annotated JSON.
+- Top-level **Play / Review / Analyzer** views. Play: toggle-select every option similar to the
+  anchor, "Save N pairs" (multi-select, schema v3); grid 2×2–8×8; seeded + replayable; per-submit
+  screenshots; JSON/CSV + screenshots PDF. Review: load a saved game JSON (v2 or v3), inspect picks,
+  add reviewer comments, verify the seed, export annotation PDF / annotated JSON. Analyzer: judge
+  the 42 class×domain-pair triplets (CLIP heatmap, Random/ERM clusters, exportable judgments).
 - `npm run build` — typecheck (`tsc --noEmit`) + production build.
 - `dev` preset = 250 pairs/mode; `production` = 334/333/333 = 1,000.
+
+## Multi-annotator Review (shared blind annotation)
+
+Several annotators can review the same game independently. Start the annotation server next to
+the dev server:
+
+```bash
+pip install -r server/requirements.txt   # once
+cd web && npm run api                    # FastAPI on 127.0.0.1:8787 (or: python server/app.py)
+```
+
+In **Review**, load a game JSON and click **"Share for annotators…"** → you get a 6-character
+code. Other annotators pick **"Join with a code"** and enter it plus a username. Each annotator
+is **blind** per puzzle — the player's selections/note and other annotators' comments stay hidden
+until they click "Show responses" (reveals are permanent and timestamped, so blind comments are
+distinguishable). Comments save server-side per annotator (`server/data/<CODE>/annotations/`),
+so nobody's work can clobber anyone else's. Exports merge every annotator, attributed.
+
+For annotators on the lab LAN: run `npm run dev -- --host` and share `http://<your-ip>:5173` —
+the app proxies `/api` to the local server, so that one URL is all they need.
 
 ## Export a HuggingFace dataset
 
@@ -82,8 +105,9 @@ for S3+CloudFront hosting at scale.
 ## Status
 
 - [x] Spec
-- [x] Front-end: Play + Review, seeded/replayable, grid sizes, timing, notes, screenshots PDF, annotation PDF (verified live)
-- [x] **Real PACS data** built & served locally — Mode 1 is a real invariant-pair builder
-- [ ] Un-pause Modes 2 & 3: run CLIP/ERM/mixture pipeline → real probs in the manifest
-- [ ] Stand up S3+CloudFront for shared/scaled hosting
-- [ ] Persistence + HuggingFace (human-viewable) / spreadsheet export
+- [x] Front-end: Play + Review + Analyzer, seeded/replayable, multi-select (v3), timing, notes, screenshots PDF, annotation PDF (verified live)
+- [x] **Real PACS data** built & served locally
+- [x] ML pipeline run: CLIP embeddings + train-split probes → Modes 2 & 3 live; Analyzer heatmap/ERM
+- [x] Multi-annotator blind Review via share codes (FastAPI, LAN)
+- [x] HuggingFace per-pair parquet export (v2 + v3 games)
+- [ ] Stand up S3+CloudFront for internet-scale hosting
