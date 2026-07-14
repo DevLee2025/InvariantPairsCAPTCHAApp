@@ -58,7 +58,17 @@ def main() -> None:
 
     config.ensure_dirs()
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # Device preference: CUDA → Intel XPU → CPU (overridable via CLIP_DEVICE).
+    import os
+
+    if os.environ.get("CLIP_DEVICE"):
+        device = os.environ["CLIP_DEVICE"]
+    elif torch.cuda.is_available():
+        device = "cuda"
+    elif getattr(torch, "xpu", None) is not None and torch.xpu.is_available():
+        device = "xpu"
+    else:
+        device = "cpu"
     print(f"Loading CLIP {config.CLIP_MODEL_NAME}/{config.CLIP_PRETRAINED} on {device} ...")
     model, _, preprocess = open_clip.create_model_and_transforms(
         config.CLIP_MODEL_NAME, pretrained=config.CLIP_PRETRAINED

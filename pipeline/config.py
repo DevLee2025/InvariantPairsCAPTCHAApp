@@ -58,8 +58,10 @@ SPLIT_SEED: int = 20260623
 # Directory containing this config.py (the pipeline/ root).
 PIPELINE_DIR: Path = Path(__file__).resolve().parent
 
-# Raw PACS JPEGs land here as RAW_DIR/<domain>/<class>/<stem>.jpg
-RAW_DIR: Path = PIPELINE_DIR / "data" / "raw"
+# Raw PACS JPEGs as RAW_DIR/<domain>/<class>/<stem>.jpg. These live in the web
+# app's public dir: build_real_manifest.py (which superseded 01_download_pacs.py)
+# writes them there so Vite serves them same-origin. Steps 02+ only READ this dir.
+RAW_DIR: Path = PIPELINE_DIR.parent / "web" / "public" / "pacs"
 
 # Intermediate artifacts (CLIP embeddings, per-image prob vectors).
 EMB_DIR: Path = PIPELINE_DIR / "data" / "embeddings"

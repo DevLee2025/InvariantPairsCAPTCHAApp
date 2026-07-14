@@ -37,6 +37,7 @@ import math
 from pathlib import Path
 
 import config
+import splits
 
 # Reproducible resampling.
 RANDOM_STATE = 0
@@ -122,18 +123,42 @@ def main() -> None:
     y_all = np.array([class_to_idx[_id_class(i)] for i in ids], dtype="int64")
     domains_all = [_id_domain(i) for i in ids]
 
+    # Seeded stratified split — identical to the manifest's (assign_splits sorts
+    # internally, so id order doesn't matter). Probes FIT on train rows only and
+    # PREDICT for every image, so val/test probs are out-of-sample.
+    split_map = splits.assign_splits(ids, config.SPLIT_RATIOS, config.SPLIT_SEED)
+    manifest_path = config.PIPELINE_DIR.parent / "web" / "public" / "manifest.json"
+    if manifest_path.exists():
+        manifest_split = {
+            im["id"]: im["split"]
+            for im in json.loads(manifest_path.read_text(encoding="utf-8"))["images"]
+        }
+        bad = [i for i in ids if manifest_split.get(i) != split_map[i]]
+        if bad:
+            raise SystemExit(
+                f"Split mismatch vs manifest for {len(bad)} ids (e.g. {bad[:3]})."
+            )
+        print(f"Split agrees with web/public/manifest.json for all {len(ids)} ids.")
+
+    train_rows = np.array([r for r, i in enumerate(ids) if split_map[i] == "train"])
+    val_rows = np.array([r for r, i in enumerate(ids) if split_map[i] == "val"])
+
     # -------------------------------------------------------------------
-    # (a) ERM probe on the full split.
+    # (a) ERM probe, fit on the train split (all 4 domains).
     # -------------------------------------------------------------------
-    print("Training ERM probe on full split ...")
+    print(f"Training ERM probe on the train split ({len(train_rows)} of {len(ids)}) ...")
+    # NOTE: no multi_class kwarg — removed in modern scikit-learn; multinomial is
+    # the default for the lbfgs solver.
     erm = LogisticRegression(
         max_iter=2000,
         C=1.0,
-        multi_class="multinomial",
-        n_jobs=-1,
     )
-    erm.fit(emb, y_all)
+    erm.fit(emb[train_rows], y_all[train_rows])
     erm_proba = _reproject_to_class_order(erm.predict_proba(emb), erm.classes_)
+    pred = erm_proba.argmax(axis=1)
+    acc_train = float((pred[train_rows] == y_all[train_rows]).mean())
+    acc_val = float((pred[val_rows] == y_all[val_rows]).mean())
+    print(f"  ERM probe accuracy — train {acc_train:.3f} · val {acc_val:.3f}")
     erm_probs = {iid: [float(p) for p in erm_proba[r]] for r, iid in enumerate(ids)}
     (config.PROBS_DIR / "erm_probs.json").write_text(
         json.dumps(erm_probs), encoding="utf-8"
@@ -146,9 +171,16 @@ def main() -> None:
     pc_rows = [r for r, d in enumerate(domains_all) if d in config.MIX_DOMAINS]
     pc_emb = emb[pc_rows]
     pc_y = y_all[pc_rows]
-    pc_domains = [domains_all[r] for r in pc_rows]
     pc_ids = [ids[r] for r in pc_rows]
-    print(f"photo+cartoon subset: {len(pc_rows)} images.")
+    # Fit subset: train-split photo+cartoon rows only (predictions cover all).
+    pc_train = [r for r in pc_rows if split_map[ids[r]] == "train"]
+    pc_train_emb = emb[pc_train]
+    pc_train_y = y_all[pc_train]
+    pc_train_domains = [domains_all[r] for r in pc_train]
+    print(
+        f"photo+cartoon subset: {len(pc_rows)} images "
+        f"({len(pc_train)} train used for fitting)."
+    )
 
     rng = np.random.default_rng(RANDOM_STATE)
     # mix_probs[id] = {ratioName: [7 floats]}
@@ -157,15 +189,13 @@ def main() -> None:
     for ratio_name, (photo_frac, cartoon_frac) in config.MIX_RATIOS.items():
         print(f"Training mixture probe '{ratio_name}' "
               f"({photo_frac:.0%}:{cartoon_frac:.0%} photo:cartoon) ...")
-        idx = _resample_indices(pc_domains, photo_frac, cartoon_frac, rng)
-        X_train = pc_emb[idx]
-        y_train = pc_y[idx]
+        idx = _resample_indices(pc_train_domains, photo_frac, cartoon_frac, rng)
+        X_train = pc_train_emb[idx]
+        y_train = pc_train_y[idx]
 
         clf = LogisticRegression(
             max_iter=2000,
             C=1.0,
-            multi_class="multinomial",
-            n_jobs=-1,
         )
         clf.fit(X_train, y_train)
         proba = _reproject_to_class_order(clf.predict_proba(pc_emb), clf.classes_)
