@@ -5,9 +5,10 @@ _Snapshot for picking the project up cleanly. See `SPEC.md` for the original des
 
 ## What this is
 A web tool to crowd-source **invariant image pairs** from PACS (same object class,
-different visual domain) to feed the PI's **GRIT** method. Two working modes today —
-**Play** (collect pairs) and **Review/Annotate** (inspect + peer-review a saved game).
-A third mode, **PACS Analyzer**, is planned (see Pending).
+different visual domain) to feed the PI's **GRIT** method. Three working views —
+**Play** (collect pairs), **Review/Annotate** (inspect + peer-review a saved game),
+and **PACS Analyzer** (judge which of the 42 class×domain-pair triplets produce
+the most/least alike pairs).
 
 ## Stack & layout
 - **Front-end:** React 18 + Vite + TypeScript + Tailwind + Zustand. `web/`.
@@ -27,11 +28,15 @@ OTG/
       lib/{manifest,export}.ts        # load manifest + resolve urls; JSON/CSV export
       lib/{screenshot,pdf}.ts         # html2canvas capture (timeout-guarded); screenshots PDF (jsPDF)
       lib/{replay,reviewPdf}.ts       # verifyGame (seed check); annotation PDF
+      lib/analyzer.ts                 # Analyzer clusters — pure fn of seed+params, own RNG
+      state/analyzerStore.ts          # Analyzer state + judgments; window.useAnalyzerStore in DEV
       modes/{registry,crossDomain,ermClip,mixture}.ts
       components/  App.tsx GlobalNav PlayView TopBar AnchorPanel StrategyPanel
                    CandidateGrid CandidateTile SavedPanel SwitchPrompt SessionComplete
                    RetryImg  review/{ReviewView,ReviewBoard}
-    public/manifest.json              # REAL PACS metadata (gitignored, ~1.5MB)
+                   analyzer/{AnalyzerView,TripletGrid,ClusterView,PairCard}
+    public/manifest.json              # REAL PACS metadata + CLIP/ERM/mix probs (gitignored, ~3MB)
+    public/triplet_stats.json         # 42-triplet CLIP-cosine stats (gitignored; build_triplet_stats.py)
     public/pacs/**                    # REAL PACS jpgs (gitignored, ~190MB, served /pacs/...)
     public/manifest.sample.json       # synthetic fallback (committed; SVG placeholder tiles)
     vite.config.ts                    # server.watch.ignored: public/pacs (see Gotchas)
@@ -39,14 +44,23 @@ OTG/
     build_real_manifest.py            # DONE-run: PACS → web/public/pacs + manifest.json (metadata only)
     splits.py                         # stratified per-(domain,class) 80/10/10 split
     build_hf_dataset.py               # saved game JSON(s) → HF parquet (embedded images)
-    01–05*.py  make_synthetic_manifest.py  config.py   # full ML pipeline (02 CLIP, 03 probes) — AUTHORED, NOT RUN
+    build_triplet_stats.py            # DONE-run: 42-triplet CLIP-cosine stats → web/public
+    merge_probs_into_manifest.py      # DONE-run: inject 02/03 probs into web manifest (hash-safe)
+    01–05*.py  make_synthetic_manifest.py  config.py   # ML pipeline — 02+03 RUN 2026-07-13 (XPU, ~3 min)
 ```
 
 ## Data contracts
 **Manifest** `{version, domains[4], classes[7], cdnBase, images:[{id:"<domain>/<class>/<stem>",
 domain, class, split:"train|val|test", file, clipProbs:[], ermProbs:[], mix:null, url}]}`.
-Real manifest: `cdnBase:"/pacs"`, `clipProbs`/`ermProbs` **empty** (Modes 2/3 paused). `url` resolved at
-load (empty cdnBase ⇒ offline SVG placeholder). Content `hash` (FNV-1a) pins the dataset.
+Real manifest: `cdnBase:"/pacs"`, `clipProbs`/`ermProbs`/`mix` **POPULATED** (merged 2026-07-13 by
+`merge_probs_into_manifest.py`; Modes 2/3 un-paused). `url` resolved at load (empty cdnBase ⇒ offline
+SVG placeholder). Content `hash` (FNV-1a over version + ordered ids ONLY) pins the dataset — merging
+probs did NOT change it, so pre-merge saved games still verify/resume.
+
+**Analyzer judgments (schemaVersion "analyzer-1")** — `{schemaVersion, manifest:{version,imageCount,
+hash}, split, judgments:[{key:"class|domA|domB", class, domainA, domainB, rating:1–5 (1=least alike),
+note, mode, criterion|null, seed, clusterSize, at}], exportedAt}` (+ flat CSV). A judgment's
+seed+params regenerate the exact judged cluster via `lib/analyzer.buildCluster`.
 
 **GameRecord (schemaVersion 2)** — one replayable game:
 `{schemaVersion:2, game:{gameId,sessionId, seed, algoVersion, mode, domainPairing, gridSize,
@@ -61,8 +75,12 @@ reviewFlag, playerNote, screenshotIndex, scores}], reviewerAnnotations:[]}`.
   used by both Play and `verifyGame`/`resumeGame` — so seed + manifest reproduces a game exactly.
 - **Train-only draws:** anchors + candidates come only from `split==="train"`; val/test held out.
 - **Same-origin images (no CDN yet):** served from `web/public/pacs` so html2canvas screenshots work.
-- **Modes 2 & 3 (ERM/CLIP) PAUSED:** auto-disabled in the UI while their manifest fields are empty.
-  Mode 1 (Cross-domain) is the only active selection mode.
+- **Modes 2 & 3 UN-PAUSED (2026-07-13):** the ML pipeline ran (CLIP ViT-B/32 embeddings + logistic
+  probes on frozen features, fit train-split-only; ERM probe acc train .978 / val .972) and probs were
+  merged into the manifest. Availability stays auto-detected from manifest fields.
+- **Analyzer isolation:** an Analyzer cluster is a pure function of (seed, mode, criterion, triplet,
+  size) with its own RNG — Analyzer use can never desync an in-progress game. ERM rankings are
+  deterministic (Reshuffle only affects Random mode).
 - **Pairing:** 6 fixed domain-pairs + `random` (mixed 3 non-anchor domains) + `random_single`
   (one random non-anchor domain, re-rolled per round). **Default = `random_single`.**
 - **Presets:** `dev` = 250 pairs/mode; `production` = 334/333/333 (=1000).
@@ -79,18 +97,21 @@ reviewFlag, playerNote, screenshotIndex, scores}], reviewerAnnotations:[]}`.
   selected-domain dropdowns + choice-time range); Annotation PDF; Save annotated JSON.
 - **Phase 0 (real PACS):** 9,991 images on disk (photo 1670 / art 2048 / cartoon 2344 / sketch 3929),
   80/10/10 split (train 7993), min 64 train/cell.
+- **PACS Analyzer (2026-07-13):** 42-triplet overview heat-colored by mean CLIP cosine (train pairs;
+  least alike: person photo×art .248, most alike: elephant cartoon×sketch .628) → drill into x∈[1,20]
+  cross-domain pairs (default 10). Random mode (seeded, Reshuffle) + ERM mode with criterion dropdown:
+  confident exemplars (default) / ERM divergence / ERM agreement. Per-triplet judgments (1–5 + note,
+  provenance-stamped) with badges + JSON/CSV export. LIVE-VERIFIED: same seed reproduces the identical
+  cluster; all three criteria rank distinctly; pre-merge saved game seed-verifies 10/10 match.
+- **ML pipeline RUN (2026-07-13):** 02 (CLIP, ran on Intel XPU ~2.5 min) + 03 (probes, train-only fit)
+  + `build_triplet_stats.py` + `merge_probs_into_manifest.py`. Embeddings kept at
+  `pipeline/data/embeddings/` (512-d, L2-normed) for future use.
 
 ## Pending / next
-1. **PACS Analyzer (3rd mode) — planned, NOT built.** Overview heatmap of the 42 triplets
-   (7 classes × 6 domain-pairs) → drill into a cluster of ≤20 cross-domain pairs; Random + ERM
-   selection. **4 open decisions:** (a) ERM pair criterion — confident-exemplars vs ERM-agreement
-   (recommended) vs ERM-divergence; (b) add CLIP-cosine similarity + overview heatmap (recommended);
-   (c) record/export per-triplet human judgments?; (d) green-light the ML run. Random mode needs no ML.
-2. **Run the ML pipeline** (`02_compute_clip` + `03_train_probes`; fix: `02` reads `pipeline/data/raw`
-   but images are in `web/public/pacs`) → populate `ermProbs` (+ keep 512-d CLIP embeddings). This
-   un-pauses Play Modes 2/3 AND enables Analyzer ERM mode. ~2 GB torch install, ~20–40 min CPU pass.
-3. **Shared hosting** (S3 + CloudFront) for multi-annotator use — needs CORS for screenshots. Deferred.
-4. **Persistence / backend** and scale toward the 1,000-pair goal. Deferred.
+1. **Shared hosting** (S3 + CloudFront) for multi-annotator use — needs CORS for screenshots. Deferred.
+2. **Persistence / backend** and scale toward the 1,000-pair goal. Deferred.
+3. Ideas: per-pair CLIP-cosine badges in Analyzer clusters (needs client-side embeddings, ~10 MB
+   quantized); LODO split variant if the PI wants it (see splits.py note).
 
 ## Gotchas
 - **Dev server:** run `npm run dev` in your OWN terminal for long collection runs (tool-launched
