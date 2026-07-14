@@ -29,7 +29,7 @@ import { exportGameCSV, exportGameJSON } from "../lib/export";
 import type { Screenshot } from "../lib/screenshot";
 import { getMode, MODE_ORDER, modeAvailable } from "../modes";
 
-export type AppView = "play" | "review";
+export type AppView = "play" | "review" | "analyzer";
 
 export const PRESETS: Record<PresetName, Record<ModeId, number>> = {
   dev: { cross_domain: 250, erm_clip: 250, mixture: 250 },

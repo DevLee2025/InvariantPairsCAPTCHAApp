@@ -32,6 +32,7 @@ export function GlobalNav({ view, onView }: Props) {
       <div className="flex items-center gap-1 rounded-lg bg-slate-200/70 p-0.5">
         {tab("play", "Play")}
         {tab("review", "Review")}
+        {tab("analyzer", "Analyzer")}
       </div>
     </header>
   );

@@ -7,6 +7,7 @@ import { useStore } from "./state/store";
 import { GlobalNav } from "./components/GlobalNav";
 import { PlayView } from "./components/PlayView";
 import { ReviewView } from "./components/review/ReviewView";
+import { AnalyzerView } from "./components/analyzer/AnalyzerView";
 
 export default function App() {
   const view = useStore((s) => s.view);
@@ -22,7 +23,13 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col bg-slate-100 text-slate-900">
       <GlobalNav view={view} onView={setView} />
-      {view === "play" ? <PlayView /> : <ReviewView />}
+      {view === "play" ? (
+        <PlayView />
+      ) : view === "review" ? (
+        <ReviewView />
+      ) : (
+        <AnalyzerView />
+      )}
     </div>
   );
 }

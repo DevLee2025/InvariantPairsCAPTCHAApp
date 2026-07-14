@@ -21,8 +21,8 @@ export function toJSON(game: GameRecord): string {
   return JSON.stringify(cleaned, null, 2);
 }
 
-// Escape a single CSV field per RFC 4180.
-function csvField(value: unknown): string {
+// Escape a single CSV field per RFC 4180. (Also used by the Analyzer export.)
+export function csvField(value: unknown): string {
   const s = value === null || value === undefined ? "" : String(value);
   if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
@@ -102,7 +102,7 @@ export function downloadFile(
   URL.revokeObjectURL(url);
 }
 
-function stamp(): string {
+export function stamp(): string {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
 

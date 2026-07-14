@@ -157,6 +157,87 @@ export type GridSize = (typeof GRID_SIZES)[number];
 export const ALGO_VERSION = 1;
 
 // ----------------------------------------------------------------------------
+// PACS Analyzer: 42 triplets = 7 classes × 6 unordered domain pairs. A human
+// inspects clusters of cross-domain pairs per triplet and judges alikeness.
+// ----------------------------------------------------------------------------
+export type AnalyzerMode = "random" | "erm";
+
+// How ERM mode ranks candidate pairs (dropdown; "confident" is the default).
+export type ErmCriterion = "confident" | "divergence" | "agreement";
+
+export const ERM_CRITERIA: { id: ErmCriterion; label: string }[] = [
+  { id: "confident", label: "Confident exemplars" },
+  { id: "divergence", label: "ERM divergence" },
+  { id: "agreement", label: "ERM agreement" },
+];
+
+// The 6 unordered domain pairs in canonical order. Must match the pipeline's
+// itertools.combinations(DOMAINS, 2) order (build_triplet_stats.py).
+export const UNORDERED_PAIRS: [Domain, Domain][] = [
+  ["photo", "art_painting"],
+  ["photo", "cartoon"],
+  ["photo", "sketch"],
+  ["art_painting", "cartoon"],
+  ["art_painting", "sketch"],
+  ["cartoon", "sketch"],
+];
+
+export interface Triplet {
+  class: ClassName;
+  domainA: Domain;
+  domainB: Domain;
+}
+
+export function tripletKey(t: Triplet): string {
+  return `${t.class}|${t.domainA}|${t.domainB}`;
+}
+
+// Shape of web/public/triplet_stats.json (pipeline/build_triplet_stats.py).
+export interface TripletStat {
+  class: ClassName;
+  domainA: Domain;
+  domainB: Domain;
+  nA: number;
+  nB: number;
+  meanCos: number;
+  medianCos: number;
+  p10: number;
+  p90: number;
+}
+
+export interface TripletStatsFile {
+  version: number;
+  split: Split;
+  clipModel: string;
+  generatedAt: string;
+  triplets: TripletStat[];
+}
+
+// A recorded human judgment of one triplet's cluster, with full provenance so
+// the exact inspected cluster can be regenerated (same ethos as GameRecord).
+export interface AnalyzerJudgment {
+  key: string; // tripletKey
+  class: ClassName;
+  domainA: Domain;
+  domainB: Domain;
+  rating: 1 | 2 | 3 | 4 | 5; // 1 = least alike … 5 = most alike
+  note: string;
+  mode: AnalyzerMode;
+  criterion: ErmCriterion | null; // null in random mode
+  seed: number;
+  clusterSize: number;
+  at: string; // ISO
+}
+
+export interface AnalyzerExportRecord {
+  schemaVersion: "analyzer-1";
+  manifest: ManifestInfo;
+  split: Split;
+  judgments: AnalyzerJudgment[];
+  exportedAt: string;
+}
+
+// ----------------------------------------------------------------------------
 // Game record (schema v2)
 // ----------------------------------------------------------------------------
 export interface ImgRef {
