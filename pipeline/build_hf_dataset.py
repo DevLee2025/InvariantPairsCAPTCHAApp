@@ -56,22 +56,42 @@ def rows_from_game(game: dict, include_options: bool) -> list[dict]:
     ann = {a["puzzleIndex"]: a["comment"] for a in game.get("reviewerAnnotations", [])}
     out: list[dict] = []
     for p in game["puzzles"]:
-        # "No good options" puzzles are not invariant pairs — exclude from the dataset.
-        if p.get("noGood") or p.get("selected") is None:
+        # Normalize selections: schema v3 stores a `selections` list (pick
+        # order); v2 stores a single `selected` + `selectedPosition`.
+        sels = p.get("selections")
+        if sels is None:
+            sels = []
+            if not p.get("noGood") and p.get("selected") is not None:
+                legacy = dict(p["selected"])
+                legacy["position"] = p.get("selectedPosition", 0)
+                legacy["pickedAt"] = p.get("selectedAt", "")
+                sels = [legacy]
+        # "No good options" puzzles are not invariant pairs — exclude.
+        if not sels:
             continue
-        a, sel = p["anchor"], p["selected"]
+        a = p["anchor"]
         anchor_img = load_image(a["id"])
-        selected_img = load_image(sel["id"])
-        if anchor_img is None or selected_img is None:
-            print(f"  ! skip {g['gameId']}#{p['puzzleIndex']} — missing anchor/selected image on disk")
+        if anchor_img is None:
+            print(f"  ! skip {g['gameId']}#{p['puzzleIndex']} — missing anchor image on disk")
             continue
         opts = p["options"]
-        row = {
+        n_sels = len(sels)
+        # One row per (anchor, selection) — a multi-select puzzle contributes
+        # several rows sharing the puzzle_index.
+        for rank, sel in enumerate(sels, start=1):
+            selected_img = load_image(sel["id"])
+            if selected_img is None:
+                print(f"  ! skip {g['gameId']}#{p['puzzleIndex']}#p{sel.get('position')} — missing selected image on disk")
+                continue
+            row = {
             # identity
-            "pair_id": f"{g['gameId']}#{p['puzzleIndex']}",
+            "pair_id": f"{g['gameId']}#{p['puzzleIndex']}#p{sel.get('position', 0)}",
             "game_id": g["gameId"],
             "session_id": g.get("sessionId", ""),
             "puzzle_index": int(p["puzzleIndex"]),
+            "selection_rank": int(rank),
+            "n_selections": int(n_sels),
+            "picked_at": sel.get("pickedAt", "") or "",
             # game config (retained per row for filtering/grouping)
             "seed": int(g["seed"]),
             "algo_version": int(g.get("algoVersion", 1)),
@@ -87,7 +107,7 @@ def rows_from_game(game: dict, include_options: bool) -> list[dict]:
             "anchor_split": a.get("split", ""),
             "anchor_url": a.get("url", ""),
             # selection
-            "selected_position": int(p["selectedPosition"]),
+            "selected_position": int(sel.get("position", 0)),
             "selected_id": sel["id"],
             "selected_domain": sel["domain"],
             "selected_class": sel["class"],
@@ -120,11 +140,11 @@ def rows_from_game(game: dict, include_options: bool) -> list[dict]:
             # embedded images (rendered by the HF viewer)
             "anchor_image": anchor_img,
             "selected_image": selected_img,
-        }
-        if include_options:
-            imgs = [load_image(o["id"]) for o in opts]
-            row["option_images"] = imgs if all(i is not None for i in imgs) else []
-        out.append(row)
+            }
+            if include_options:
+                imgs = [load_image(o["id"]) for o in opts]
+                row["option_images"] = imgs if all(i is not None for i in imgs) else []
+            out.append(row)
     return out
 
 
@@ -136,6 +156,9 @@ def features(include_options: bool):
         "game_id": Value("string"),
         "session_id": Value("string"),
         "puzzle_index": Value("int32"),
+        "selection_rank": Value("int32"),
+        "n_selections": Value("int32"),
+        "picked_at": Value("string"),
         "seed": Value("int64"),
         "algo_version": Value("int32"),
         "mode": Value("string"),
@@ -197,7 +220,9 @@ Human-curated invariant image pairs from PACS (for the GRIT method). One row per
 pair: an `anchor_image` and the player's `selected_image` (same object class,
 different visual domain), both embedded so they render in the dataset viewer,
 plus full provenance (seed, mode, domain pairing, positions, timing, player /
-reviewer notes, and the ids/urls of every option shown).
+reviewer notes, and the ids/urls of every option shown). A multi-select puzzle
+(schema v3) contributes several rows sharing a `puzzle_index`; `selection_rank`
+is the player's pick order within the puzzle.
 """
 
 
@@ -219,8 +244,8 @@ def main() -> None:
     rows: list[dict] = []
     for gp in games:
         game = json.loads(gp.read_text(encoding="utf-8"))
-        if game.get("schemaVersion") != 2:
-            print(f"  skip {gp.name}: schemaVersion != 2")
+        if game.get("schemaVersion") not in (2, 3):
+            print(f"  skip {gp.name}: schemaVersion not in (2, 3)")
             continue
         rows.extend(rows_from_game(game, args.include_options))
 
