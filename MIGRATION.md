@@ -62,13 +62,21 @@ hash}, split, judgments:[{key:"class|domA|domB", class, domainA, domainB, rating
 note, mode, criterion|null, seed, clusterSize, at}], exportedAt}` (+ flat CSV). A judgment's
 seed+params regenerate the exact judged cluster via `lib/analyzer.buildCluster`.
 
-**GameRecord (schemaVersion 2)** — one replayable game:
-`{schemaVersion:2, game:{gameId,sessionId, seed, algoVersion, mode, domainPairing, gridSize,
+**GameRecord (schemaVersion 3 — multi-select)** — one replayable game:
+`{schemaVersion:3, game:{gameId,sessionId, seed, algoVersion, mode, domainPairing, gridSize,
 optionCount, split, manifest:{version,imageCount,hash}, startedAt,endedAt, timing:{overallMs,
 averageMs,medianMs,perCaptchaMs}}, puzzles:[{puzzleIndex, mode, domainPairing, anchor,
-options:[{...,position}], selectedPosition, selected|null, noGood, shownAt, selectedAt, durationMs,
-reviewFlag, playerNote, screenshotIndex, scores}], reviewerAnnotations:[]}`.
-`selected:null`/`noGood:true`/`selectedPosition:0` ⇒ player chose "no good options".
+options:[{...,position}], selections:[{...,position,pickedAt}], selectionScores{id→scores},
+selectedPosition, selected|null, noGood, shownAt, selectedAt, durationMs, reviewFlag, playerNote,
+screenshotIndex, scores}], reviewerAnnotations:[]}`.
+`selections` (pick order) is CANONICAL — each entry is one invariant pair; empty + `noGood:true` ⇒
+"no good options". `selected`/`selectedPosition`/`scores` are legacy mirrors of the FIRST pick so
+v2-era tooling still reads v3 files. **v2 files auto-upgrade on load** (`lib/upgrade.ts` — used by
+Review, resume, verify, and the HF builder); saving/annotating re-emits them as v3. Quota counts
+PAIRS (Σ selections; noGood adds 0 — so a resumed v2 game with noGood puzzles shows a slightly
+lower count than when saved). CSV = one row per (anchor, selection) with `selection_rank`/
+`n_selections`/`picked_at`; HF parquet likewise (`pair_id = gameId#puzzleIndex#p<position>`).
+Player choices never touch the seeded RNG ⇒ algoVersion stays 1 and old seeds replay unchanged.
 
 ## Key decisions
 - **Reproducibility:** one seeded mulberry32 RNG per game; `generateRound()` is the *single* draw path
@@ -88,9 +96,11 @@ reviewFlag, playerNote, screenshotIndex, scores}], reviewerAnnotations:[]}`.
   anchor+selected images) — NOT the raw game JSON (that's one row + breaks Parquet).
 
 ## Current status — built & verified
-- **Play:** seeded/replayable; grid 2×2–8×8; per-puzzle + overall/avg/median timing; player note +
-  "Flag for review"; **"No good options"** button; per-pick screenshot; JSON/CSV + Screenshots PDF;
-  **Load game** (resume a saved JSON — replays RNG to continue seamlessly; screenshots not restored).
+- **Play:** seeded/replayable; grid 2×2–8×8; **multi-select (2026-07-14)** — toggle any number of
+  options, submit with "Save N pairs" ("No good options" disabled while picks exist); per-puzzle +
+  overall/avg/median timing; player note + "Flag for review"; per-submit screenshot (all picks
+  ringed); JSON/CSV + Screenshots PDF; **Load game** (resume a saved v2/v3 JSON — replays RNG to
+  continue seamlessly; screenshots not restored). Submit tolerates rAF-throttled background tabs.
 - **Review:** load JSON; numbered grid, red-bordered pick, player note; **reviewer comments** with
   **crash-safe auto-save** (File System Access API, Chromium) via "Submit comment"; **seed-verify**;
   **filters** (AND-combined: No-good / Flagged / Player-commented + class / anchor-domain /
