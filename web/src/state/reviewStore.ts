@@ -1,6 +1,14 @@
 // Review/Annotation mode state (Phase C). Loads a saved game JSON, lets a
 // reviewer step through puzzles and add per-puzzle comments, runs the seed
 // reproducibility check, and assembles the annotated game for export.
+//
+// Two sources:
+//   "local"  — the original single-user file flow (offline, FSA auto-save).
+//   "shared" — multi-annotator mode via server/app.py: the game lives behind a
+//     share code; each annotator's comments persist server-side in their own
+//     file; the annotator stays BLIND per puzzle (no selections / player note /
+//     other annotators' comments) until they reveal it, and reveals are
+//     recorded so blind comments are distinguishable from post-reveal ones.
 
 import { create } from "zustand";
 import type {
@@ -13,7 +21,27 @@ import type {
 import { verifyGame, type VerifyResult } from "../lib/replay";
 import { toJSON, downloadFile } from "../lib/export";
 import { upgradeGameRecord } from "../lib/upgrade";
+import {
+  apiGetAll,
+  apiGetGame,
+  apiGetOwn,
+  apiPutOwn,
+  apiShareGame,
+  type OwnComments,
+} from "../lib/api";
 import { useStore } from "./store";
+
+const USERNAME_KEY = "grit-annotator";
+
+export type ReviewSource = "local" | "shared";
+
+// One other annotator's comment on one puzzle (shown after reveal).
+export interface OtherComment {
+  annotator: string;
+  comment: string;
+  at: string;
+  revealedAt: string | null; // null ⇒ THEY commented blind
+}
 
 // Minimal shape of a File System Access API handle (Chromium). Avoids depending on
 // the exact DOM lib version.
@@ -98,7 +126,21 @@ export interface ReviewState {
   filters: ReviewFilters;
   durationBounds: { minMs: number; maxMs: number }; // slider bounds for this game
 
+  // Shared (multi-annotator) mode.
+  source: ReviewSource;
+  shareCode: string | null;
+  username: string; // persisted in localStorage across sessions
+  annotationAt: Record<number, string>; // own comment timestamps (shared)
+  revealed: Record<number, string>; // puzzleIndex → own reveal ISO (permanent)
+  others: Record<number, OtherComment[]>; // fetched on reveal/refresh
+  netBusy: boolean;
+
   load: (text: string, fileName?: string) => void;
+  setUsername: (u: string) => void;
+  shareGame: (username: string) => Promise<void>;
+  joinByCode: (code: string, username: string) => Promise<void>;
+  reveal: (puzzleIndex: number) => Promise<void>;
+  refreshOthers: () => Promise<void>;
   setIndex: (i: number) => void;
   next: () => void;
   prev: () => void;
@@ -123,6 +165,35 @@ const NO_FILTERS: ReviewFilters = {
   maxMs: 0,
 };
 
+// Case-insensitive annotator identity ("Alice" == "alice"), matching the
+// server's filename slugs closely enough for self-filtering.
+function sameUser(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+// Serialize + upload THIS annotator's comments/reveals to the server. Each
+// annotator writes only their own file, so pushes never race other annotators.
+async function pushOwn(get: () => ReviewState): Promise<void> {
+  const { shareCode, username, annotations, annotationAt, revealed } = get();
+  if (!shareCode || !username.trim()) return;
+  const comments: OwnComments = {};
+  const keys = new Set([
+    ...Object.keys(annotations).map(Number),
+    ...Object.keys(revealed).map(Number),
+  ]);
+  for (const pi of keys) {
+    const comment = (annotations[pi] ?? "").trim();
+    const revealedAt = revealed[pi] ?? null;
+    if (!comment && !revealedAt) continue;
+    comments[String(pi)] = {
+      comment,
+      at: annotationAt[pi] ?? new Date().toISOString(),
+      revealedAt,
+    };
+  }
+  await apiPutOwn(shareCode, username, comments);
+}
+
 export const useReviewStore = create<ReviewState>((set, get) => ({
   game: null,
   fileName: null,
@@ -135,6 +206,17 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   autoSaveMsg: null,
   filters: NO_FILTERS,
   durationBounds: { minMs: 0, maxMs: 0 },
+
+  source: "local",
+  shareCode: null,
+  username:
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem(USERNAME_KEY) ?? ""
+      : "",
+  annotationAt: {},
+  revealed: {},
+  others: {},
+  netBusy: false,
 
   load(text, fileName) {
     try {
@@ -164,10 +246,130 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
         autoSaveMsg: null,
         durationBounds: bounds,
         filters: { ...NO_FILTERS, minMs: bounds.minMs, maxMs: bounds.maxMs },
+        // A fresh load is local until shared/joined (username persists).
+        source: "local",
+        shareCode: null,
+        annotationAt: {},
+        revealed: {},
+        others: {},
+        netBusy: false,
       });
     } catch (e) {
       set({ error: `Could not parse JSON: ${(e as Error).message}` });
     }
+  },
+
+  setUsername(u) {
+    if (typeof localStorage !== "undefined") localStorage.setItem(USERNAME_KEY, u);
+    set({ username: u });
+  },
+
+  // Upload the loaded game and switch to shared mode; idempotent (re-sharing
+  // the same game returns its existing code). Local comments carry over.
+  async shareGame(username) {
+    const name = username.trim();
+    const game = get().game;
+    if (!game || !name) {
+      set({ autoSaveMsg: "Enter an annotator name to share." });
+      return;
+    }
+    set({ netBusy: true });
+    try {
+      const res = await apiShareGame(game, name);
+      get().setUsername(name);
+      set({
+        source: "shared",
+        shareCode: res.code,
+        annotationFile: null, // server persistence replaces the FSA auto-save
+        autoSaveMsg: res.existing
+          ? `Already shared — code ${res.code}. Give it to your annotators.`
+          : `Shared — code ${res.code}. Give it to your annotators.`,
+      });
+      await pushOwn(get); // carry any pre-share local comments to the server
+    } catch (e) {
+      set({ autoSaveMsg: `Share failed: ${(e as Error).message}` });
+    } finally {
+      set({ netBusy: false });
+    }
+  },
+
+  // Join an existing shared game by code; restores this annotator's previous
+  // comments AND reveal state, so rejoining continues where they left off.
+  async joinByCode(code, username) {
+    const name = username.trim();
+    if (!name) {
+      set({ error: "Enter an annotator name to join." });
+      return;
+    }
+    set({ netBusy: true, error: null });
+    try {
+      const data = await apiGetGame(code);
+      get().load(JSON.stringify(data.game), `shared ${data.code}`);
+      if (!get().game) return; // load() already set the error
+      const own = await apiGetOwn(data.code, name);
+      const annotations: Record<number, string> = {};
+      const annotationAt: Record<number, string> = {};
+      const revealed: Record<number, string> = {};
+      for (const [k, v] of Object.entries(own.comments ?? {})) {
+        const pi = Number(k);
+        if (v.comment) {
+          annotations[pi] = v.comment;
+          annotationAt[pi] = v.at;
+        }
+        if (v.revealedAt) revealed[pi] = v.revealedAt;
+      }
+      get().setUsername(name);
+      set({
+        source: "shared",
+        shareCode: data.code,
+        annotations,
+        annotationAt,
+        revealed,
+        autoSaveMsg: `Joined ${data.code} as ${name}.`,
+      });
+    } catch (e) {
+      set({ error: (e as Error).message });
+    } finally {
+      set({ netBusy: false });
+    }
+  },
+
+  // Permanently reveal one puzzle's responses for THIS annotator: record the
+  // timestamp, fetch other annotators' comments, persist the reveal.
+  async reveal(puzzleIndex) {
+    const s = get();
+    if (s.source !== "shared" || s.revealed[puzzleIndex]) return;
+    set({
+      revealed: { ...s.revealed, [puzzleIndex]: new Date().toISOString() },
+    });
+    try {
+      await get().refreshOthers();
+      await pushOwn(get);
+    } catch (e) {
+      set({ autoSaveMsg: `Reveal sync failed: ${(e as Error).message}` });
+    }
+  },
+
+  // Re-fetch all annotators' comments (shown only for revealed puzzles).
+  async refreshOthers() {
+    const { shareCode, username } = get();
+    if (!shareCode) return;
+    const all = await apiGetAll(shareCode);
+    const others: Record<number, OtherComment[]> = {};
+    for (const rec of all) {
+      if (sameUser(rec.username, username)) continue;
+      for (const [k, v] of Object.entries(rec.comments ?? {})) {
+        if (!v.comment) continue;
+        const pi = Number(k);
+        (others[pi] ??= []).push({
+          annotator: rec.username,
+          comment: v.comment,
+          at: v.at,
+          revealedAt: v.revealedAt ?? null,
+        });
+      }
+    }
+    set({ others });
   },
 
   setIndex(i) {
@@ -260,10 +462,28 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
     }
   },
 
-  // Called on "Submit comment": persist the current annotations. Uses the chosen
-  // file (no prompt) if set; otherwise forces the file setup, or downloads if the
-  // File System Access API is unavailable.
+  // Called on "Submit comment": persist the current annotations. Shared mode
+  // saves to the server (this annotator's own file); local mode uses the chosen
+  // FSA file (no prompt) if set, otherwise forces the file setup, or downloads
+  // if the File System Access API is unavailable.
   async submitComment(puzzleIndex) {
+    if (get().source === "shared") {
+      set({
+        annotationAt: {
+          ...get().annotationAt,
+          [puzzleIndex]: new Date().toISOString(),
+        },
+      });
+      try {
+        await pushOwn(get);
+        set({
+          autoSaveMsg: `Saved to server (${get().shareCode}) at ${new Date().toLocaleTimeString()}.`,
+        });
+      } catch (e) {
+        set({ autoSaveMsg: `Server save failed: ${(e as Error).message}` });
+      }
+      return;
+    }
     const annotated = get().annotatedGame();
     if (!annotated) return;
     const handle = get().annotationFile;
@@ -315,15 +535,20 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   },
 
   annotatedGame() {
-    const { game, annotations } = get();
+    const { game, annotations, annotationAt, username, source, revealed } = get();
     if (!game) return null;
     const reviewerAnnotations: ReviewerAnnotation[] = Object.entries(annotations)
       .filter(([, comment]) => comment.trim().length > 0)
-      .map(([puzzleIndex, comment]) => ({
-        puzzleIndex: Number(puzzleIndex),
-        comment,
-        at: new Date().toISOString(),
-      }));
+      .map(([puzzleIndex, comment]) => {
+        const pi = Number(puzzleIndex);
+        return {
+          puzzleIndex: pi,
+          comment,
+          at: annotationAt[pi] ?? new Date().toISOString(),
+          ...(username.trim() ? { annotator: username.trim() } : {}),
+          ...(source === "shared" ? { revealedAt: revealed[pi] ?? null } : {}),
+        };
+      });
     return { ...game, reviewerAnnotations };
   },
 
@@ -340,6 +565,12 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
       autoSaveMsg: null,
       filters: NO_FILTERS,
       durationBounds: { minMs: 0, maxMs: 0 },
+      source: "local",
+      shareCode: null,
+      annotationAt: {},
+      revealed: {},
+      others: {},
+      netBusy: false,
     });
   },
 }));

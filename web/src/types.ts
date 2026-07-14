@@ -302,6 +302,10 @@ export interface ReviewerAnnotation {
   puzzleIndex: number;
   comment: string;
   at: string; // ISO
+  annotator?: string; // multi-annotator mode: who wrote it
+  // Shared (blind) mode: when this annotator revealed the puzzle's responses.
+  // null ⇒ the comment was written fully blind; absent ⇒ local single-user mode.
+  revealedAt?: string | null;
 }
 
 export interface GameMeta {

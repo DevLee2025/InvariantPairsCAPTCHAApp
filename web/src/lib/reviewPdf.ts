@@ -1,11 +1,13 @@
 // Annotation report PDF (req 4): ONE PAGE PER PUZZLE showing the anchor and the
-// FULL numbered option grid (player's pick boxed red), plus the player note/flag
-// and the reviewer's comment — so mentors can see every choice the player had.
+// FULL numbered option grid (player's picks boxed red), plus the player note/flag
+// and every reviewer's comment (attributed; "[blind]" = written before that
+// annotator revealed the responses) — so mentors can see every choice the
+// player had and how independent reviewers judged it.
 //
 // Images are pre-rasterized in parallel (timeout + placeholder) so the PDF never
 // silently comes out blank if some loads are slow.
 
-import type { GameRecord } from "../types";
+import type { GameRecord, ReviewerAnnotation } from "../types";
 
 function stamp(): string {
   return new Date().toISOString().replace(/[:.]/g, "-");
@@ -70,10 +72,19 @@ async function rasterizeAll(
 
 export async function exportAnnotationPDF(
   game: GameRecord,
-  annotations: Record<number, string>
+  annotations: ReviewerAnnotation[]
 ): Promise<void> {
   const { jsPDF } = await import("jspdf");
   const g = game.game;
+
+  // Group attributed comments per puzzle.
+  const byPuzzle = new Map<number, ReviewerAnnotation[]>();
+  for (const a of annotations) {
+    if (!a.comment.trim()) continue;
+    const list = byPuzzle.get(a.puzzleIndex) ?? [];
+    list.push(a);
+    byPuzzle.set(a.puzzleIndex, list);
+  }
 
   // Pre-rasterize anchor + every option for every puzzle.
   const cache = new Map<string, string | null>();
@@ -181,14 +192,21 @@ export async function exportAnnotationPDF(
     );
     ty += 18;
     doc.setTextColor(20);
-    doc.text(
-      doc.splitTextToSize(
-        `Reviewer: ${annotations[p.puzzleIndex] || "—"}`,
-        pageW - 2 * margin
-      ),
-      margin,
-      ty
-    );
+    const anns = byPuzzle.get(p.puzzleIndex) ?? [];
+    const reviewerLines =
+      anns.length === 0
+        ? ["Reviewer: —"]
+        : anns.map(
+            (a) =>
+              `Reviewer${a.annotator ? ` (${a.annotator})` : ""}${
+                a.revealedAt === null ? " [blind]" : ""
+              }: ${a.comment}`
+          );
+    for (const line of reviewerLines) {
+      const wrapped = doc.splitTextToSize(line, pageW - 2 * margin) as string[];
+      doc.text(wrapped, margin, ty);
+      ty += wrapped.length * 11 + 4;
+    }
   });
 
   doc.save(`grit-annotations-${stamp()}.pdf`);

@@ -3,11 +3,13 @@
 // reviewer add per-puzzle comments, runs the seed reproducibility check, and
 // exports an annotation PDF / annotated JSON.
 
-import { useEffect, useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useReviewStore } from "../../state/reviewStore";
 import { CLASSES, DOMAINS, type ClassName, type Domain } from "../../types";
-import { exportGameJSON } from "../../lib/export";
+import { downloadFile, exportGameJSON, stamp } from "../../lib/export";
 import { exportAnnotationPDF } from "../../lib/reviewPdf";
+import { upgradeGameRecord } from "../../lib/upgrade";
+import { apiGetExport } from "../../lib/api";
 import { ReviewBoard } from "./ReviewBoard";
 
 const chip =
@@ -20,6 +22,8 @@ function s(n: number | null): string {
 export function ReviewView() {
   const r = useReviewStore();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [joinCode, setJoinCode] = useState("");
+  const [nameInput, setNameInput] = useState(r.username);
 
   // Warm the image cache for the current + adjacent puzzles so scrubbing is smooth.
   useEffect(() => {
@@ -59,23 +63,65 @@ export function ReviewView() {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center p-6">
         {hiddenInput}
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-800">
-            Review a saved game
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Load a game JSON exported from Play to review the choices, add
-            comments, and verify reproducibility.
-          </p>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="mt-5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-          >
-            Load game JSON
-          </button>
+        <div className="grid w-full max-w-3xl gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-800">
+              Review a saved game
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Load a game JSON exported from Play to review the choices, add
+              comments, and verify reproducibility.
+            </p>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="mt-5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            >
+              Load game JSON
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-800">
+              Join with a code
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Enter a share code from another annotator. You review blind —
+              selections and other comments stay hidden until you reveal them.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="Your annotator name"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800"
+                aria-label="Annotator name"
+              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  placeholder="CODE"
+                  maxLength={6}
+                  className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-center font-mono text-sm uppercase tracking-widest text-slate-800"
+                  aria-label="Share code"
+                />
+                <button
+                  type="button"
+                  disabled={r.netBusy || joinCode.trim().length < 6 || !nameInput.trim()}
+                  onClick={() => r.joinByCode(joinCode, nameInput)}
+                  className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-40"
+                >
+                  {r.netBusy ? "Joining…" : "Join"}
+                </button>
+              </div>
+            </div>
+          </div>
+
           {r.error && (
-            <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 md:col-span-2">
               {r.error}
             </p>
           )}
@@ -88,9 +134,46 @@ export function ReviewView() {
   const puzzle = r.game.puzzles[r.index];
   const total = r.game.puzzles.length;
   const v = r.verify;
+  const shared = r.source === "shared";
+  const blind = shared && !!puzzle && !r.revealed[puzzle.puzzleIndex];
+  const leakTitle = shared
+    ? "Disabled in shared mode — this filter would leak the player's responses"
+    : undefined;
 
-  const annotatedGame = r.annotatedGame();
+  const onShare = () => {
+    const name =
+      window.prompt(
+        "Annotator name (used to attribute your comments):",
+        r.username || ""
+      ) ?? "";
+    if (name.trim()) void r.shareGame(name);
+  };
 
+  // Shared mode exports use the server's merged record (all annotators).
+  const onAnnotationPDF = async () => {
+    if (shared && r.shareCode) {
+      const merged = upgradeGameRecord(await apiGetExport(r.shareCode));
+      if (merged) await exportAnnotationPDF(merged, merged.reviewerAnnotations);
+    } else if (r.game) {
+      await exportAnnotationPDF(
+        r.game,
+        r.annotatedGame()?.reviewerAnnotations ?? []
+      );
+    }
+  };
+  const onSaveJSON = async () => {
+    if (shared && r.shareCode) {
+      const raw = await apiGetExport(r.shareCode);
+      downloadFile(
+        `grit-shared-annotations-${r.shareCode}-${stamp()}.json`,
+        JSON.stringify(raw, null, 2),
+        "application/json"
+      );
+    } else {
+      const annotated = r.annotatedGame();
+      if (annotated) exportGameJSON(annotated);
+    }
+  };
   // Filtering.
   const filtered = r.getFiltered();
   const filteredCount = filtered.length;
@@ -119,6 +202,29 @@ export function ReviewView() {
           <span className="max-w-[180px] truncate text-xs text-slate-400">
             {r.fileName}
           </span>
+        )}
+        {shared && r.shareCode ? (
+          <>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard?.writeText(r.shareCode!)}
+              title="Share code — click to copy. Other annotators join Review with it."
+              className="rounded-md bg-accent-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-accent"
+            >
+              code {r.shareCode}
+            </button>
+            <span className={chip}>annotator {r.username}</span>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={onShare}
+            disabled={r.netBusy}
+            title="Upload this game to the annotation server and get a share code for other annotators"
+            className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          >
+            Share for annotators…
+          </button>
         )}
         <span className={chip}>seed {g.seed}</span>
         <span className={chip}>
@@ -160,30 +266,34 @@ export function ReviewView() {
             </span>
           )}
 
+          {!shared && (
+            <button
+              type="button"
+              onClick={r.chooseAnnotationFile}
+              title="Pick a file that annotations auto-save to on every submit (crash-safe)"
+              className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
+                r.annotationFile
+                  ? "border-green-300 bg-green-50 text-green-700"
+                  : "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
+              }`}
+            >
+              {r.annotationFile
+                ? `Auto-save: ${r.annotationFile.name}`
+                : "Enable auto-save"}
+            </button>
+          )}
           <button
             type="button"
-            onClick={r.chooseAnnotationFile}
-            title="Pick a file that annotations auto-save to on every submit (crash-safe)"
-            className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
-              r.annotationFile
-                ? "border-green-300 bg-green-50 text-green-700"
-                : "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
-            }`}
-          >
-            {r.annotationFile
-              ? `Auto-save: ${r.annotationFile.name}`
-              : "Enable auto-save"}
-          </button>
-          <button
-            type="button"
-            onClick={() => exportAnnotationPDF(r.game!, r.annotations)}
+            onClick={() => void onAnnotationPDF()}
+            title={shared ? "Includes every annotator's comments" : undefined}
             className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
           >
             Annotation PDF
           </button>
           <button
             type="button"
-            onClick={() => annotatedGame && exportGameJSON(annotatedGame)}
+            onClick={() => void onSaveJSON()}
+            title={shared ? "Downloads the merged record (all annotators)" : undefined}
             className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
           >
             Save annotated JSON
@@ -194,28 +304,40 @@ export function ReviewView() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600">
         <span className="font-medium text-slate-500">Filter (all apply):</span>
-        <label className="flex items-center gap-1.5">
+        <label
+          className={`flex items-center gap-1.5 ${shared ? "opacity-40" : ""}`}
+          title={leakTitle}
+        >
           <input
             type="checkbox"
             checked={r.filters.noGood}
+            disabled={shared}
             onChange={(e) => r.setFilters({ noGood: e.target.checked })}
             className="h-3.5 w-3.5 accent-slate-600"
           />
           “No good option”
         </label>
-        <label className="flex items-center gap-1.5">
+        <label
+          className={`flex items-center gap-1.5 ${shared ? "opacity-40" : ""}`}
+          title={leakTitle}
+        >
           <input
             type="checkbox"
             checked={r.filters.flagged}
+            disabled={shared}
             onChange={(e) => r.setFilters({ flagged: e.target.checked })}
             className="h-3.5 w-3.5 accent-slate-600"
           />
           Flagged for review
         </label>
-        <label className="flex items-center gap-1.5">
+        <label
+          className={`flex items-center gap-1.5 ${shared ? "opacity-40" : ""}`}
+          title={leakTitle}
+        >
           <input
             type="checkbox"
             checked={r.filters.commented}
+            disabled={shared}
             onChange={(e) => r.setFilters({ commented: e.target.checked })}
             className="h-3.5 w-3.5 accent-slate-600"
           />
@@ -254,10 +376,12 @@ export function ReviewView() {
         </select>
         <select
           value={r.filters.selectedDomain}
+          disabled={shared}
+          title={leakTitle}
           onChange={(e) =>
             r.setFilters({ selectedDomain: e.target.value as Domain | "" })
           }
-          className="rounded border border-slate-300 bg-white px-1 py-0.5"
+          className="rounded border border-slate-300 bg-white px-1 py-0.5 disabled:opacity-40"
           aria-label="Selected image domain filter"
         >
           <option value="">any selected domain</option>
@@ -361,7 +485,7 @@ export function ReviewView() {
           </div>
         ) : (
           <>
-            <ReviewBoard puzzle={puzzle} gridSize={g.gridSize} />
+            <ReviewBoard puzzle={puzzle} gridSize={g.gridSize} blind={blind} />
             <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2">
           <div className="flex items-center justify-between gap-2">
             <label className="text-[11px] font-medium text-slate-500">
@@ -394,6 +518,61 @@ export function ReviewView() {
             </button>
           </div>
             </div>
+
+            {shared && (
+              <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2">
+                {blind ? (
+                  <button
+                    type="button"
+                    onClick={() => void r.reveal(puzzle.puzzleIndex)}
+                    title="Permanently reveals this puzzle's responses for you (recorded with a timestamp)"
+                    className="w-full rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                  >
+                    🙈 Show responses — the player’s selection and other annotators’ comments
+                  </button>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-slate-500">
+                        Other annotators · revealed{" "}
+                        {new Date(
+                          r.revealed[puzzle.puzzleIndex]
+                        ).toLocaleTimeString()}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => void r.refreshOthers()}
+                        className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
+                      >
+                        Refresh
+                      </button>
+                    </div>
+                    {(r.others[puzzle.puzzleIndex] ?? []).length === 0 ? (
+                      <p className="mt-1 text-xs text-slate-400">
+                        No comments from other annotators yet.
+                      </p>
+                    ) : (
+                      <ul className="mt-1 space-y-1">
+                        {(r.others[puzzle.puzzleIndex] ?? []).map((o) => (
+                          <li key={o.annotator} className="text-xs text-slate-700">
+                            <span className="font-semibold">{o.annotator}</span>
+                            {o.revealedAt === null && (
+                              <span
+                                className="ml-1 rounded bg-slate-100 px-1 text-[10px] text-slate-500"
+                                title="Written before this annotator revealed the responses"
+                              >
+                                blind
+                              </span>
+                            )}
+                            <span className="ml-1.5">{o.comment}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </main>
