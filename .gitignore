@@ -1,0 +1,21 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# ML pipeline artifacts (regenerable — see pipeline/README.md)
+# data/: downloaded PACS + computed embeddings/probs; out/: HF export outputs
+pipeline/data/
+pipeline/out/
+
+# Per-machine Claude Code permissions
+.claude/settings.local.json
+
+# NOTE: web/.gitignore excludes web/node_modules, web/dist, and the ~148 MB
+# web/public/pacs images + real manifest (rebuilt by pipeline/build_real_manifest.py).
+# pipeline/OTGTests/ and Archive/ ARE tracked on purpose: human-collected game
+# data is primary data and not regenerable.

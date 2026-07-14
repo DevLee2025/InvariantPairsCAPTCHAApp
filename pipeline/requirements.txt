@@ -1,0 +1,20 @@
+# Phase-0 offline pipeline dependencies (Python 3.11+).
+#
+# Install everything for the full pipeline:
+#     pip install -r requirements.txt
+#
+# NOTE: make_synthetic_manifest.py needs NONE of these — it is stdlib-only and
+# runs out of the box. Only the real ML steps (01-05) need the packages below.
+
+# --- HEAVY (large download; GPU optional, CPU works but is slow) ------------
+torch>=2.1                # CLIP backbone runtime. Big (~2GB). CPU-only is fine.
+open_clip_torch>=2.24     # frozen CLIP model + tokenizer (used by 02_compute_clip.py).
+                          # Alternative: `transformers` CLIP — would require code changes.
+datasets>=2.18            # HuggingFace dataset loader for flwrlabs/pacs (01).
+scikit-learn>=1.3         # LogisticRegression probes (03). Moderate size.
+
+# --- LIGHT / standard -------------------------------------------------------
+numpy>=1.24               # arrays for embeddings + probs (02, 03).
+pillow>=10.0              # image decode/encode (01, 02).
+boto3>=1.34               # S3 upload (05). Only needed for the CDN step.
+tqdm>=4.66                # progress bars (01, 02, 05). Optional convenience.

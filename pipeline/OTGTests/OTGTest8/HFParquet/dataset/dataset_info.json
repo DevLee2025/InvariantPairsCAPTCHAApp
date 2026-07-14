@@ -1,0 +1,201 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "pair_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "game_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "session_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "puzzle_index": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "seed": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "algo_version": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "mode": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "domain_pairing": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "grid_size": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "option_count": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "split": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "anchor_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "anchor_domain": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "anchor_class": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "anchor_split": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "anchor_url": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "selected_position": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "selected_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "selected_domain": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "selected_class": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "selected_split": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "selected_url": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "duration_ms": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "shown_at": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "selected_at": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "review_flag": {
+      "dtype": "bool",
+      "_type": "Value"
+    },
+    "player_note": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "reviewer_comment": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "screenshot_index": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "n_options": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "option_positions": {
+      "feature": {
+        "dtype": "int32",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "option_ids": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "option_domains": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "option_classes": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "option_urls": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "manifest_hash": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "manifest_version": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "manifest_image_count": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "game_started_at": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "game_ended_at": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "game_overall_ms": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "game_average_ms": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "game_median_ms": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "anchor_image": {
+      "_type": "Image"
+    },
+    "selected_image": {
+      "_type": "Image"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

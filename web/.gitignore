@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vite
+
+# Local PACS data built by pipeline/build_real_manifest.py (~190 MB)
+public/pacs/
+public/manifest.json

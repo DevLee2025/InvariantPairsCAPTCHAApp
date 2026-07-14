@@ -1,0 +1,2051 @@
+{
+  "schemaVersion": 2,
+  "game": {
+    "gameId": "44015bb4-e7eb-4138-843f-b6833ef1704c",
+    "sessionId": "6bab4e32-8f61-4594-a6c9-8b3238730e2f",
+    "seed": 922530912,
+    "algoVersion": 1,
+    "mode": "cross_domain",
+    "domainPairing": "random_single",
+    "gridSize": 3,
+    "optionCount": 9,
+    "split": "train",
+    "manifest": {
+      "version": 1,
+      "imageCount": 9991,
+      "hash": "fnv1a-e721b826"
+    },
+    "startedAt": "2026-06-30T13:59:04.523Z",
+    "endedAt": "2026-06-30T14:00:44.157Z",
+    "timing": {
+      "overallMs": 99634,
+      "averageMs": 4032,
+      "medianMs": 146,
+      "perCaptchaMs": [
+        77077,
+        370,
+        131,
+        414,
+        218,
+        155,
+        107,
+        130,
+        88,
+        135,
+        105,
+        108,
+        136,
+        60,
+        299,
+        112,
+        239,
+        174,
+        156,
+        416
+      ]
+    }
+  },
+  "puzzles": [
+    {
+      "puzzleIndex": 1,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "photo/person/0375",
+        "domain": "photo",
+        "class": "person",
+        "split": "train",
+        "url": "/pacs/photo/person/0375.jpg"
+      },
+      "options": [
+        {
+          "id": "cartoon/person/0333",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0333.jpg",
+          "position": 1
+        },
+        {
+          "id": "cartoon/person/0097",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0097.jpg",
+          "position": 2
+        },
+        {
+          "id": "cartoon/person/0243",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0243.jpg",
+          "position": 3
+        },
+        {
+          "id": "cartoon/person/0198",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0198.jpg",
+          "position": 4
+        },
+        {
+          "id": "cartoon/person/0164",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0164.jpg",
+          "position": 5
+        },
+        {
+          "id": "cartoon/person/0290",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0290.jpg",
+          "position": 6
+        },
+        {
+          "id": "cartoon/person/0316",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0316.jpg",
+          "position": 7
+        },
+        {
+          "id": "cartoon/person/0274",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0274.jpg",
+          "position": 8
+        },
+        {
+          "id": "cartoon/person/0302",
+          "domain": "cartoon",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/cartoon/person/0302.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "cartoon/person/0333",
+        "domain": "cartoon",
+        "class": "person",
+        "split": "train",
+        "url": "/pacs/cartoon/person/0333.jpg"
+      },
+      "shownAt": "2026-06-30T13:59:16.345Z",
+      "selectedAt": "2026-06-30T14:00:33.422Z",
+      "durationMs": 77077,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 1
+    },
+    {
+      "puzzleIndex": 2,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "sketch/horse/0527",
+        "domain": "sketch",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/sketch/horse/0527.jpg"
+      },
+      "options": [
+        {
+          "id": "photo/horse/0151",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0151.jpg",
+          "position": 1
+        },
+        {
+          "id": "photo/horse/0122",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0122.jpg",
+          "position": 2
+        },
+        {
+          "id": "photo/horse/0130",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0130.jpg",
+          "position": 3
+        },
+        {
+          "id": "photo/horse/0184",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0184.jpg",
+          "position": 4
+        },
+        {
+          "id": "photo/horse/0160",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0160.jpg",
+          "position": 5
+        },
+        {
+          "id": "photo/horse/0004",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0004.jpg",
+          "position": 6
+        },
+        {
+          "id": "photo/horse/0110",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0110.jpg",
+          "position": 7
+        },
+        {
+          "id": "photo/horse/0158",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0158.jpg",
+          "position": 8
+        },
+        {
+          "id": "photo/horse/0039",
+          "domain": "photo",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/photo/horse/0039.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "photo/horse/0151",
+        "domain": "photo",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/photo/horse/0151.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:33.698Z",
+      "selectedAt": "2026-06-30T14:00:34.068Z",
+      "durationMs": 370,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 2
+    },
+    {
+      "puzzleIndex": 3,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "cartoon/horse/0038",
+        "domain": "cartoon",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/cartoon/horse/0038.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/horse/0114",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0114.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/horse/0442",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0442.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/horse/0179",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0179.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/horse/0011",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0011.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/horse/0133",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0133.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/horse/0780",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0780.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/horse/0497",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0497.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/horse/0804",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0804.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/horse/0206",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0206.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/horse/0114",
+        "domain": "sketch",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/sketch/horse/0114.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:34.249Z",
+      "selectedAt": "2026-06-30T14:00:34.380Z",
+      "durationMs": 131,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 3
+    },
+    {
+      "puzzleIndex": 4,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "photo/elephant/0166",
+        "domain": "photo",
+        "class": "elephant",
+        "split": "train",
+        "url": "/pacs/photo/elephant/0166.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/elephant/0016",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0016.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/elephant/0691",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0691.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/elephant/0108",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0108.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/elephant/0600",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0600.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/elephant/0402",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0402.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/elephant/0118",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0118.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/elephant/0558",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0558.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/elephant/0486",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0486.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/elephant/0718",
+          "domain": "sketch",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/sketch/elephant/0718.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/elephant/0016",
+        "domain": "sketch",
+        "class": "elephant",
+        "split": "train",
+        "url": "/pacs/sketch/elephant/0016.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:34.638Z",
+      "selectedAt": "2026-06-30T14:00:35.052Z",
+      "durationMs": 414,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 4
+    },
+    {
+      "puzzleIndex": 5,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "cartoon/horse/0185",
+        "domain": "cartoon",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/cartoon/horse/0185.jpg"
+      },
+      "options": [
+        {
+          "id": "art_painting/horse/0179",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0179.jpg",
+          "position": 1
+        },
+        {
+          "id": "art_painting/horse/0066",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0066.jpg",
+          "position": 2
+        },
+        {
+          "id": "art_painting/horse/0085",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0085.jpg",
+          "position": 3
+        },
+        {
+          "id": "art_painting/horse/0036",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0036.jpg",
+          "position": 4
+        },
+        {
+          "id": "art_painting/horse/0091",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0091.jpg",
+          "position": 5
+        },
+        {
+          "id": "art_painting/horse/0008",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0008.jpg",
+          "position": 6
+        },
+        {
+          "id": "art_painting/horse/0000",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0000.jpg",
+          "position": 7
+        },
+        {
+          "id": "art_painting/horse/0198",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0198.jpg",
+          "position": 8
+        },
+        {
+          "id": "art_painting/horse/0193",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0193.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "art_painting/horse/0179",
+        "domain": "art_painting",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/art_painting/horse/0179.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:35.220Z",
+      "selectedAt": "2026-06-30T14:00:35.438Z",
+      "durationMs": 218,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 5
+    },
+    {
+      "puzzleIndex": 6,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "sketch/guitar/0318",
+        "domain": "sketch",
+        "class": "guitar",
+        "split": "train",
+        "url": "/pacs/sketch/guitar/0318.jpg"
+      },
+      "options": [
+        {
+          "id": "photo/guitar/0165",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0165.jpg",
+          "position": 1
+        },
+        {
+          "id": "photo/guitar/0157",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0157.jpg",
+          "position": 2
+        },
+        {
+          "id": "photo/guitar/0028",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0028.jpg",
+          "position": 3
+        },
+        {
+          "id": "photo/guitar/0067",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0067.jpg",
+          "position": 4
+        },
+        {
+          "id": "photo/guitar/0099",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0099.jpg",
+          "position": 5
+        },
+        {
+          "id": "photo/guitar/0129",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0129.jpg",
+          "position": 6
+        },
+        {
+          "id": "photo/guitar/0125",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0125.jpg",
+          "position": 7
+        },
+        {
+          "id": "photo/guitar/0025",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0025.jpg",
+          "position": 8
+        },
+        {
+          "id": "photo/guitar/0008",
+          "domain": "photo",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/photo/guitar/0008.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "photo/guitar/0165",
+        "domain": "photo",
+        "class": "guitar",
+        "split": "train",
+        "url": "/pacs/photo/guitar/0165.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:35.608Z",
+      "selectedAt": "2026-06-30T14:00:35.763Z",
+      "durationMs": 155,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 6
+    },
+    {
+      "puzzleIndex": 7,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "photo/elephant/0111",
+        "domain": "photo",
+        "class": "elephant",
+        "split": "train",
+        "url": "/pacs/photo/elephant/0111.jpg"
+      },
+      "options": [
+        {
+          "id": "art_painting/elephant/0120",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0120.jpg",
+          "position": 1
+        },
+        {
+          "id": "art_painting/elephant/0184",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0184.jpg",
+          "position": 2
+        },
+        {
+          "id": "art_painting/elephant/0231",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0231.jpg",
+          "position": 3
+        },
+        {
+          "id": "art_painting/elephant/0016",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0016.jpg",
+          "position": 4
+        },
+        {
+          "id": "art_painting/elephant/0134",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0134.jpg",
+          "position": 5
+        },
+        {
+          "id": "art_painting/elephant/0128",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0128.jpg",
+          "position": 6
+        },
+        {
+          "id": "art_painting/elephant/0111",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0111.jpg",
+          "position": 7
+        },
+        {
+          "id": "art_painting/elephant/0201",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0201.jpg",
+          "position": 8
+        },
+        {
+          "id": "art_painting/elephant/0241",
+          "domain": "art_painting",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/art_painting/elephant/0241.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "art_painting/elephant/0120",
+        "domain": "art_painting",
+        "class": "elephant",
+        "split": "train",
+        "url": "/pacs/art_painting/elephant/0120.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:35.922Z",
+      "selectedAt": "2026-06-30T14:00:36.029Z",
+      "durationMs": 107,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 7
+    },
+    {
+      "puzzleIndex": 8,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "art_painting/house/0057",
+        "domain": "art_painting",
+        "class": "house",
+        "split": "train",
+        "url": "/pacs/art_painting/house/0057.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/house/0010",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0010.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/house/0073",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0073.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/house/0055",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0055.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/house/0067",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0067.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/house/0047",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0047.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/house/0070",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0070.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/house/0017",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0017.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/house/0063",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0063.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/house/0032",
+          "domain": "sketch",
+          "class": "house",
+          "split": "train",
+          "url": "/pacs/sketch/house/0032.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/house/0010",
+        "domain": "sketch",
+        "class": "house",
+        "split": "train",
+        "url": "/pacs/sketch/house/0010.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:36.171Z",
+      "selectedAt": "2026-06-30T14:00:36.301Z",
+      "durationMs": 130,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 8
+    },
+    {
+      "puzzleIndex": 9,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "cartoon/giraffe/0185",
+        "domain": "cartoon",
+        "class": "giraffe",
+        "split": "train",
+        "url": "/pacs/cartoon/giraffe/0185.jpg"
+      },
+      "options": [
+        {
+          "id": "photo/giraffe/0107",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0107.jpg",
+          "position": 1
+        },
+        {
+          "id": "photo/giraffe/0097",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0097.jpg",
+          "position": 2
+        },
+        {
+          "id": "photo/giraffe/0044",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0044.jpg",
+          "position": 3
+        },
+        {
+          "id": "photo/giraffe/0005",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0005.jpg",
+          "position": 4
+        },
+        {
+          "id": "photo/giraffe/0034",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0034.jpg",
+          "position": 5
+        },
+        {
+          "id": "photo/giraffe/0117",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0117.jpg",
+          "position": 6
+        },
+        {
+          "id": "photo/giraffe/0071",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0071.jpg",
+          "position": 7
+        },
+        {
+          "id": "photo/giraffe/0051",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0051.jpg",
+          "position": 8
+        },
+        {
+          "id": "photo/giraffe/0167",
+          "domain": "photo",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/photo/giraffe/0167.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "photo/giraffe/0107",
+        "domain": "photo",
+        "class": "giraffe",
+        "split": "train",
+        "url": "/pacs/photo/giraffe/0107.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:36.458Z",
+      "selectedAt": "2026-06-30T14:00:36.546Z",
+      "durationMs": 88,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 9
+    },
+    {
+      "puzzleIndex": 10,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "sketch/horse/0286",
+        "domain": "sketch",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/sketch/horse/0286.jpg"
+      },
+      "options": [
+        {
+          "id": "cartoon/horse/0274",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0274.jpg",
+          "position": 1
+        },
+        {
+          "id": "cartoon/horse/0205",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0205.jpg",
+          "position": 2
+        },
+        {
+          "id": "cartoon/horse/0186",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0186.jpg",
+          "position": 3
+        },
+        {
+          "id": "cartoon/horse/0223",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0223.jpg",
+          "position": 4
+        },
+        {
+          "id": "cartoon/horse/0229",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0229.jpg",
+          "position": 5
+        },
+        {
+          "id": "cartoon/horse/0300",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0300.jpg",
+          "position": 6
+        },
+        {
+          "id": "cartoon/horse/0069",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0069.jpg",
+          "position": 7
+        },
+        {
+          "id": "cartoon/horse/0000",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0000.jpg",
+          "position": 8
+        },
+        {
+          "id": "cartoon/horse/0233",
+          "domain": "cartoon",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/cartoon/horse/0233.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "cartoon/horse/0274",
+        "domain": "cartoon",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/cartoon/horse/0274.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:36.716Z",
+      "selectedAt": "2026-06-30T14:00:36.851Z",
+      "durationMs": 135,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 10
+    },
+    {
+      "puzzleIndex": 11,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "photo/horse/0098",
+        "domain": "photo",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/photo/horse/0098.jpg"
+      },
+      "options": [
+        {
+          "id": "art_painting/horse/0088",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0088.jpg",
+          "position": 1
+        },
+        {
+          "id": "art_painting/horse/0138",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0138.jpg",
+          "position": 2
+        },
+        {
+          "id": "art_painting/horse/0188",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0188.jpg",
+          "position": 3
+        },
+        {
+          "id": "art_painting/horse/0065",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0065.jpg",
+          "position": 4
+        },
+        {
+          "id": "art_painting/horse/0119",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0119.jpg",
+          "position": 5
+        },
+        {
+          "id": "art_painting/horse/0015",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0015.jpg",
+          "position": 6
+        },
+        {
+          "id": "art_painting/horse/0141",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0141.jpg",
+          "position": 7
+        },
+        {
+          "id": "art_painting/horse/0033",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0033.jpg",
+          "position": 8
+        },
+        {
+          "id": "art_painting/horse/0173",
+          "domain": "art_painting",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/art_painting/horse/0173.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "art_painting/horse/0088",
+        "domain": "art_painting",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/art_painting/horse/0088.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:37.018Z",
+      "selectedAt": "2026-06-30T14:00:37.123Z",
+      "durationMs": 105,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 11
+    },
+    {
+      "puzzleIndex": 12,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "art_painting/guitar/0074",
+        "domain": "art_painting",
+        "class": "guitar",
+        "split": "train",
+        "url": "/pacs/art_painting/guitar/0074.jpg"
+      },
+      "options": [
+        {
+          "id": "cartoon/guitar/0108",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0108.jpg",
+          "position": 1
+        },
+        {
+          "id": "cartoon/guitar/0052",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0052.jpg",
+          "position": 2
+        },
+        {
+          "id": "cartoon/guitar/0126",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0126.jpg",
+          "position": 3
+        },
+        {
+          "id": "cartoon/guitar/0029",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0029.jpg",
+          "position": 4
+        },
+        {
+          "id": "cartoon/guitar/0036",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0036.jpg",
+          "position": 5
+        },
+        {
+          "id": "cartoon/guitar/0025",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0025.jpg",
+          "position": 6
+        },
+        {
+          "id": "cartoon/guitar/0031",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0031.jpg",
+          "position": 7
+        },
+        {
+          "id": "cartoon/guitar/0022",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0022.jpg",
+          "position": 8
+        },
+        {
+          "id": "cartoon/guitar/0021",
+          "domain": "cartoon",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/cartoon/guitar/0021.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "cartoon/guitar/0108",
+        "domain": "cartoon",
+        "class": "guitar",
+        "split": "train",
+        "url": "/pacs/cartoon/guitar/0108.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:37.295Z",
+      "selectedAt": "2026-06-30T14:00:37.403Z",
+      "durationMs": 108,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 12
+    },
+    {
+      "puzzleIndex": 13,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "art_painting/dog/0119",
+        "domain": "art_painting",
+        "class": "dog",
+        "split": "train",
+        "url": "/pacs/art_painting/dog/0119.jpg"
+      },
+      "options": [
+        {
+          "id": "photo/dog/0026",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0026.jpg",
+          "position": 1
+        },
+        {
+          "id": "photo/dog/0062",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0062.jpg",
+          "position": 2
+        },
+        {
+          "id": "photo/dog/0079",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0079.jpg",
+          "position": 3
+        },
+        {
+          "id": "photo/dog/0054",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0054.jpg",
+          "position": 4
+        },
+        {
+          "id": "photo/dog/0109",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0109.jpg",
+          "position": 5
+        },
+        {
+          "id": "photo/dog/0092",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0092.jpg",
+          "position": 6
+        },
+        {
+          "id": "photo/dog/0156",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0156.jpg",
+          "position": 7
+        },
+        {
+          "id": "photo/dog/0066",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0066.jpg",
+          "position": 8
+        },
+        {
+          "id": "photo/dog/0030",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0030.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "photo/dog/0026",
+        "domain": "photo",
+        "class": "dog",
+        "split": "train",
+        "url": "/pacs/photo/dog/0026.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:37.554Z",
+      "selectedAt": "2026-06-30T14:00:37.690Z",
+      "durationMs": 136,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 13
+    },
+    {
+      "puzzleIndex": 14,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "cartoon/dog/0021",
+        "domain": "cartoon",
+        "class": "dog",
+        "split": "train",
+        "url": "/pacs/cartoon/dog/0021.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/dog/0334",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0334.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/dog/0352",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0352.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/dog/0012",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0012.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/dog/0694",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0694.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/dog/0572",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0572.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/dog/0126",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0126.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/dog/0213",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0213.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/dog/0278",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0278.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/dog/0137",
+          "domain": "sketch",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/sketch/dog/0137.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/dog/0334",
+        "domain": "sketch",
+        "class": "dog",
+        "split": "train",
+        "url": "/pacs/sketch/dog/0334.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:37.870Z",
+      "selectedAt": "2026-06-30T14:00:37.930Z",
+      "durationMs": 60,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 14
+    },
+    {
+      "puzzleIndex": 15,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "art_painting/giraffe/0204",
+        "domain": "art_painting",
+        "class": "giraffe",
+        "split": "train",
+        "url": "/pacs/art_painting/giraffe/0204.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/giraffe/0000",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0000.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/giraffe/0374",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0374.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/giraffe/0429",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0429.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/giraffe/0394",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0394.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/giraffe/0445",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0445.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/giraffe/0534",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0534.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/giraffe/0613",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0613.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/giraffe/0563",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0563.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/giraffe/0722",
+          "domain": "sketch",
+          "class": "giraffe",
+          "split": "train",
+          "url": "/pacs/sketch/giraffe/0722.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/giraffe/0000",
+        "domain": "sketch",
+        "class": "giraffe",
+        "split": "train",
+        "url": "/pacs/sketch/giraffe/0000.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:38.136Z",
+      "selectedAt": "2026-06-30T14:00:38.435Z",
+      "durationMs": 299,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 15
+    },
+    {
+      "puzzleIndex": 16,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "photo/person/0302",
+        "domain": "photo",
+        "class": "person",
+        "split": "train",
+        "url": "/pacs/photo/person/0302.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/person/0115",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0115.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/person/0158",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0158.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/person/0149",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0149.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/person/0060",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0060.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/person/0093",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0093.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/person/0024",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0024.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/person/0021",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0021.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/person/0152",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0152.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/person/0037",
+          "domain": "sketch",
+          "class": "person",
+          "split": "train",
+          "url": "/pacs/sketch/person/0037.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/person/0115",
+        "domain": "sketch",
+        "class": "person",
+        "split": "train",
+        "url": "/pacs/sketch/person/0115.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:38.612Z",
+      "selectedAt": "2026-06-30T14:00:38.724Z",
+      "durationMs": 112,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 16
+    },
+    {
+      "puzzleIndex": 17,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "art_painting/horse/0078",
+        "domain": "art_painting",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/art_painting/horse/0078.jpg"
+      },
+      "options": [
+        {
+          "id": "sketch/horse/0328",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0328.jpg",
+          "position": 1
+        },
+        {
+          "id": "sketch/horse/0557",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0557.jpg",
+          "position": 2
+        },
+        {
+          "id": "sketch/horse/0112",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0112.jpg",
+          "position": 3
+        },
+        {
+          "id": "sketch/horse/0215",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0215.jpg",
+          "position": 4
+        },
+        {
+          "id": "sketch/horse/0641",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0641.jpg",
+          "position": 5
+        },
+        {
+          "id": "sketch/horse/0539",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0539.jpg",
+          "position": 6
+        },
+        {
+          "id": "sketch/horse/0340",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0340.jpg",
+          "position": 7
+        },
+        {
+          "id": "sketch/horse/0418",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0418.jpg",
+          "position": 8
+        },
+        {
+          "id": "sketch/horse/0648",
+          "domain": "sketch",
+          "class": "horse",
+          "split": "train",
+          "url": "/pacs/sketch/horse/0648.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "sketch/horse/0328",
+        "domain": "sketch",
+        "class": "horse",
+        "split": "train",
+        "url": "/pacs/sketch/horse/0328.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:38.871Z",
+      "selectedAt": "2026-06-30T14:00:39.110Z",
+      "durationMs": 239,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 17
+    },
+    {
+      "puzzleIndex": 18,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "cartoon/elephant/0403",
+        "domain": "cartoon",
+        "class": "elephant",
+        "split": "train",
+        "url": "/pacs/cartoon/elephant/0403.jpg"
+      },
+      "options": [
+        {
+          "id": "photo/elephant/0050",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0050.jpg",
+          "position": 1
+        },
+        {
+          "id": "photo/elephant/0080",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0080.jpg",
+          "position": 2
+        },
+        {
+          "id": "photo/elephant/0140",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0140.jpg",
+          "position": 3
+        },
+        {
+          "id": "photo/elephant/0055",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0055.jpg",
+          "position": 4
+        },
+        {
+          "id": "photo/elephant/0053",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0053.jpg",
+          "position": 5
+        },
+        {
+          "id": "photo/elephant/0113",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0113.jpg",
+          "position": 6
+        },
+        {
+          "id": "photo/elephant/0133",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0133.jpg",
+          "position": 7
+        },
+        {
+          "id": "photo/elephant/0197",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0197.jpg",
+          "position": 8
+        },
+        {
+          "id": "photo/elephant/0035",
+          "domain": "photo",
+          "class": "elephant",
+          "split": "train",
+          "url": "/pacs/photo/elephant/0035.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "photo/elephant/0050",
+        "domain": "photo",
+        "class": "elephant",
+        "split": "train",
+        "url": "/pacs/photo/elephant/0050.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:39.270Z",
+      "selectedAt": "2026-06-30T14:00:39.444Z",
+      "durationMs": 174,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 18
+    },
+    {
+      "puzzleIndex": 19,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "photo/guitar/0128",
+        "domain": "photo",
+        "class": "guitar",
+        "split": "train",
+        "url": "/pacs/photo/guitar/0128.jpg"
+      },
+      "options": [
+        {
+          "id": "art_painting/guitar/0045",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0045.jpg",
+          "position": 1
+        },
+        {
+          "id": "art_painting/guitar/0093",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0093.jpg",
+          "position": 2
+        },
+        {
+          "id": "art_painting/guitar/0010",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0010.jpg",
+          "position": 3
+        },
+        {
+          "id": "art_painting/guitar/0042",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0042.jpg",
+          "position": 4
+        },
+        {
+          "id": "art_painting/guitar/0138",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0138.jpg",
+          "position": 5
+        },
+        {
+          "id": "art_painting/guitar/0012",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0012.jpg",
+          "position": 6
+        },
+        {
+          "id": "art_painting/guitar/0091",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0091.jpg",
+          "position": 7
+        },
+        {
+          "id": "art_painting/guitar/0071",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0071.jpg",
+          "position": 8
+        },
+        {
+          "id": "art_painting/guitar/0132",
+          "domain": "art_painting",
+          "class": "guitar",
+          "split": "train",
+          "url": "/pacs/art_painting/guitar/0132.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "art_painting/guitar/0045",
+        "domain": "art_painting",
+        "class": "guitar",
+        "split": "train",
+        "url": "/pacs/art_painting/guitar/0045.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:39.599Z",
+      "selectedAt": "2026-06-30T14:00:39.755Z",
+      "durationMs": 156,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 19
+    },
+    {
+      "puzzleIndex": 20,
+      "mode": "cross_domain",
+      "domainPairing": "random_single",
+      "anchor": {
+        "id": "art_painting/dog/0018",
+        "domain": "art_painting",
+        "class": "dog",
+        "split": "train",
+        "url": "/pacs/art_painting/dog/0018.jpg"
+      },
+      "options": [
+        {
+          "id": "photo/dog/0024",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0024.jpg",
+          "position": 1
+        },
+        {
+          "id": "photo/dog/0010",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0010.jpg",
+          "position": 2
+        },
+        {
+          "id": "photo/dog/0035",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0035.jpg",
+          "position": 3
+        },
+        {
+          "id": "photo/dog/0173",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0173.jpg",
+          "position": 4
+        },
+        {
+          "id": "photo/dog/0108",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0108.jpg",
+          "position": 5
+        },
+        {
+          "id": "photo/dog/0116",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0116.jpg",
+          "position": 6
+        },
+        {
+          "id": "photo/dog/0171",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0171.jpg",
+          "position": 7
+        },
+        {
+          "id": "photo/dog/0034",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0034.jpg",
+          "position": 8
+        },
+        {
+          "id": "photo/dog/0015",
+          "domain": "photo",
+          "class": "dog",
+          "split": "train",
+          "url": "/pacs/photo/dog/0015.jpg",
+          "position": 9
+        }
+      ],
+      "selectedPosition": 1,
+      "selected": {
+        "id": "photo/dog/0024",
+        "domain": "photo",
+        "class": "dog",
+        "split": "train",
+        "url": "/pacs/photo/dog/0024.jpg"
+      },
+      "shownAt": "2026-06-30T14:00:39.909Z",
+      "selectedAt": "2026-06-30T14:00:40.325Z",
+      "durationMs": 416,
+      "reviewFlag": false,
+      "playerNote": "",
+      "screenshotIndex": 20
+    }
+  ],
+  "reviewerAnnotations": []
+}
