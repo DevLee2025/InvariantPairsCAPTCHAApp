@@ -12,6 +12,9 @@ __pycache__/
 pipeline/data/
 pipeline/out/
 
+# Multi-annotator server storage (shared games + per-annotator comments)
+server/data/
+
 # Per-machine Claude Code permissions
 .claude/settings.local.json
 

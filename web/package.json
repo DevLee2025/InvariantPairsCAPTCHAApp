@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "gen:manifest": "node scripts/gen-sample-manifest.mjs"
+    "gen:manifest": "node scripts/gen-sample-manifest.mjs",
+    "api": "python ../server/app.py"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",

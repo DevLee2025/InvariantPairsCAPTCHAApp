@@ -12,5 +12,10 @@ export default defineConfig({
       // served statically; we just never edit them during play.
       ignored: ["**/public/pacs/**", "**/public/manifest.json"],
     },
+    // Multi-annotator Review API (server/app.py). Proxying keeps everything
+    // same-origin, so LAN annotators only need the Vite URL (`npm run dev -- --host`).
+    proxy: {
+      "/api": "http://127.0.0.1:8787",
+    },
   },
 });
