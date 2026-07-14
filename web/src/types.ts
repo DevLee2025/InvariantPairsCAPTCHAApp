@@ -1,5 +1,7 @@
 // Shared contracts for the GRIT invariant-pairs game.
-// Schema v2 — a reproducible *game record* (not a flat pair list). See SPEC.md.
+// Schema v3 — a reproducible *game record* (not a flat pair list) whose puzzles
+// carry MULTI-SELECT `selections` (v2 single-select files are auto-upgraded on
+// load by lib/upgrade.ts). See SPEC.md.
 
 // ----------------------------------------------------------------------------
 // Domains & classes (PACS)
@@ -252,22 +254,35 @@ export interface PuzzleOption extends ImgRef {
   position: number; // 1..N²
 }
 
+// One selected option (schema v3 multi-select), in pick order.
+export interface SelectedOption extends PuzzleOption {
+  pickedAt: string; // ISO — when the player (last) toggled it on
+}
+
 export interface PuzzleRecord {
   puzzleIndex: number; // 1-based, in play order (req 2)
   mode: ModeId; // mode active for this puzzle (games may switch modes)
   domainPairing: DomainPair; // effective pairing for this puzzle (replay-robust)
   anchor: ImgRef;
   options: PuzzleOption[]; // ordered by position (req 3)
-  selectedPosition: number; // 1..N², or 0 when noGood
-  selected: ImgRef | null; // null when the player marked "no good options"
+  // v3 canonical: EVERY selected option, ordered by pick order. Each selection
+  // is one invariant pair (anchor, selection). Empty ⇒ "no good options".
+  selections: SelectedOption[];
+  // Mode scores per selected id (Modes 2/3; empty for cross_domain — omitted
+  // from exported JSON when empty for Parquet safety).
+  selectionScores: Record<string, Record<string, number>>;
+  // Legacy v2 mirrors of the FIRST pick, kept populated so v2-era tooling can
+  // still read v3 files (it sees the primary pick only).
+  selectedPosition: number; // first pick's position, or 0 when none
+  selected: ImgRef | null; // first pick, or null when none
   noGood: boolean; // player rejected all options (no invariant pair produced)
   shownAt: string; // ISO — when the puzzle was rendered (req 7)
-  selectedAt: string; // ISO — when the player chose
+  selectedAt: string; // ISO — when the player submitted (last pick for v2 files)
   durationMs: number; // selectedAt − shownAt
   reviewFlag: boolean; // player flagged for review (req 5a)
   playerNote: string; // player's plain-text note (req 5a)
   screenshotIndex: number | null; // → screenshots PDF (req 5b; Phase B)
-  scores: Record<string, number>; // mode-specific (empty for cross_domain)
+  scores: Record<string, number>; // legacy mirror: first pick's mode scores
 }
 
 export interface GameTiming {
@@ -306,7 +321,7 @@ export interface GameMeta {
 }
 
 export interface GameRecord {
-  schemaVersion: 2;
+  schemaVersion: 3; // in-memory records are ALWAYS v3 (v2 files upgraded on load)
   game: GameMeta;
   puzzles: PuzzleRecord[];
   reviewerAnnotations: ReviewerAnnotation[]; // added in Review mode (Phase C)

@@ -12,6 +12,7 @@ import type {
 } from "../types";
 import { verifyGame, type VerifyResult } from "../lib/replay";
 import { toJSON, downloadFile } from "../lib/export";
+import { upgradeGameRecord } from "../lib/upgrade";
 import { useStore } from "./store";
 
 // Minimal shape of a File System Access API handle (Chromium). Avoids depending on
@@ -44,16 +45,6 @@ function annotationsFromGame(game: GameRecord): Record<number, string> {
   return map;
 }
 
-function isGameRecord(x: unknown): x is GameRecord {
-  if (!x || typeof x !== "object") return false;
-  const g = x as Partial<GameRecord>;
-  return (
-    g.schemaVersion === 2 &&
-    !!g.game &&
-    Array.isArray(g.puzzles)
-  );
-}
-
 // Review filters. ALL active filters are AND-combined (each one narrows the pool).
 // Marker booleans require that trait; the class / anchor-domain / selected-domain
 // dropdowns pin a triplet ("" = any); the choice-time range is a bound.
@@ -74,7 +65,12 @@ function puzzlePasses(p: PuzzleRecord, f: ReviewFilters): boolean {
   if (f.commented && p.playerNote.trim().length === 0) return false;
   if (f.klass && p.anchor.class !== f.klass) return false;
   if (f.anchorDomain && p.anchor.domain !== f.anchorDomain) return false;
-  if (f.selectedDomain && (!p.selected || p.selected.domain !== f.selectedDomain))
+  // Multi-select: passes when ANY selection is from the domain (noGood puzzles
+  // have no selections, so they stay excluded when this filter is set).
+  if (
+    f.selectedDomain &&
+    !p.selections.some((sel) => sel.domain === f.selectedDomain)
+  )
     return false;
   return p.durationMs >= f.minMs && p.durationMs <= f.maxMs;
 }
@@ -142,11 +138,12 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
 
   load(text, fileName) {
     try {
-      const parsed = JSON.parse(text);
-      if (!isGameRecord(parsed)) {
+      // Normalize v2 (single-select) or v3 (multi-select) files to v3.
+      const parsed = upgradeGameRecord(JSON.parse(text));
+      if (!parsed) {
         set({
           error:
-            "Not a valid GRIT game file (expected schemaVersion 2 with a game + puzzles).",
+            "Not a valid GRIT game file (expected schemaVersion 2 or 3 with a game + puzzles).",
         });
         return;
       }

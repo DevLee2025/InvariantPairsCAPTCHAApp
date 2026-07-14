@@ -123,12 +123,19 @@ export function SavedPanel({
                 />
                 <span className="text-slate-300">→</span>
                 {p.selected ? (
-                  <img
-                    src={p.selected.url}
-                    alt={`${p.selected.domain} · ${p.selected.class}`}
-                    loading="lazy"
-                    className="h-11 w-11 shrink-0 rounded border-2 border-red-400 object-cover"
-                  />
+                  <span className="relative h-11 w-11 shrink-0">
+                    <img
+                      src={p.selected.url}
+                      alt={`${p.selected.domain} · ${p.selected.class}`}
+                      loading="lazy"
+                      className="h-11 w-11 rounded border-2 border-red-400 object-cover"
+                    />
+                    {p.selections.length > 1 && (
+                      <span className="absolute -bottom-1 -right-1 rounded bg-red-500 px-1 text-[9px] font-semibold text-white">
+                        +{p.selections.length - 1}
+                      </span>
+                    )}
+                  </span>
                 ) : (
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-dashed border-slate-300 text-center text-[9px] leading-tight text-slate-400">
                     no good
@@ -136,15 +143,19 @@ export function SavedPanel({
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-xs font-medium text-slate-700">
-                    {p.noGood ? "no good option" : `pos ${p.selectedPosition}`} ·{" "}
-                    {fmtMs(p.durationMs)}
+                    {p.noGood
+                      ? "no good option"
+                      : `pos ${p.selections.map((sel) => sel.position).join(",")}${
+                          p.selections.length > 1 ? ` · ${p.selections.length} pairs` : ""
+                        }`}{" "}
+                    · {fmtMs(p.durationMs)}
                   </div>
                   <div className="flex flex-wrap gap-1 text-[10px] text-slate-400">
                     <span className="rounded bg-slate-100 px-1 py-0.5">
                       {getMode(p.mode).label.split(" · ")[0]}
                     </span>
                     <span className="rounded bg-slate-100 px-1 py-0.5">
-                      +{p.options.length - 1} passed
+                      +{p.options.length - p.selections.length} passed
                     </span>
                     {p.reviewFlag && (
                       <span className="rounded bg-amber-100 px-1 py-0.5 text-amber-700">

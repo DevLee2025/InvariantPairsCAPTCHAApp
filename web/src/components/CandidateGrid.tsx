@@ -8,15 +8,15 @@ import { CandidateTile } from "./CandidateTile";
 interface Props {
   candidates: Img[];
   gridSize: number;
-  selectedId: string | null;
-  onSelect: (id: string) => void;
+  selectedIds: ReadonlySet<string>; // multi-select: every toggled-on tile
+  onToggle: (id: string) => void;
 }
 
 export function CandidateGrid({
   candidates,
   gridSize,
-  selectedId,
-  onSelect,
+  selectedIds,
+  onToggle,
 }: Props) {
   return (
     <div
@@ -37,8 +37,8 @@ export function CandidateGrid({
             key={img.id}
             img={img}
             position={i + 1}
-            selected={img.id === selectedId}
-            onSelect={onSelect}
+            selected={selectedIds.has(img.id)}
+            onToggle={onToggle}
           />
         ))}
       </div>

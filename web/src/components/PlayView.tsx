@@ -23,17 +23,27 @@ export function PlayView() {
   const quota = s.session.perModeQuota[s.mode];
   const params = { ...(getMode(s.mode).defaultParams ?? {}) };
   const optionCount = s.gridSize * s.gridSize;
+  const pendingCount = s.pendingSelections.length;
+  const selectedIds = new Set(s.pendingSelections);
 
-  // Record a response (a candidate id, or null for "no good options"), capture the
-  // answered board, then advance.
-  const respond = async (candidateId: string | null) => {
+  // Submit the current picks ([] via "No good options"), capture the answered
+  // board (all picked tiles are ringed), then advance.
+  const submit = async (ids: string[]) => {
     const st = useStore.getState();
     if (st.capturing || !st.round) return;
-    const res = st.recordSelection(candidateId);
+    const res = st.recordSelections(ids);
     if (!res) return;
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-    );
+    // Let the selection rings paint before capturing — but rAF is throttled to
+    // ZERO in a backgrounded tab, so never hang on it (150 ms fallback).
+    await new Promise<void>((resolve) => {
+      const t = window.setTimeout(resolve, 150);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          window.clearTimeout(t);
+          resolve();
+        })
+      );
+    });
     const el = boardRef.current;
     const shot = el ? await captureElement(el) : null;
     useStore.getState().commitScreenshot(res.puzzleIndex, shot, res.shouldAdvance);
@@ -127,8 +137,8 @@ export function PlayView() {
                     <CandidateGrid
                       candidates={s.round.options}
                       gridSize={s.gridSize}
-                      selectedId={s.selectedId}
-                      onSelect={respond}
+                      selectedIds={selectedIds}
+                      onToggle={s.toggleSelection}
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-slate-400">
@@ -157,15 +167,32 @@ export function PlayView() {
                 />
                 <button
                   type="button"
-                  onClick={() => respond(null)}
-                  disabled={s.capturing || !s.round}
-                  title="None of the options are a good match for the anchor"
+                  onClick={() => submit([])}
+                  disabled={s.capturing || !s.round || pendingCount > 0}
+                  title={
+                    pendingCount > 0
+                      ? "You have picks selected — deselect them first if none are good"
+                      : "None of the options are a good match for the anchor"
+                  }
                   className="shrink-0 rounded-md border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 hover:bg-amber-100 disabled:opacity-40"
                 >
                   No good options
                 </button>
+                <button
+                  type="button"
+                  onClick={() => submit(useStore.getState().pendingSelections)}
+                  disabled={s.capturing || !s.round || pendingCount === 0}
+                  title="Save every selected option as an invariant pair with the anchor"
+                  className="shrink-0 rounded-md bg-accent px-3 py-1 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
+                >
+                  Save {pendingCount} pair{pendingCount === 1 ? "" : "s"}
+                </button>
                 <span className="hidden shrink-0 text-[11px] text-slate-400 lg:inline">
-                  {s.capturing ? "Saving…" : "saved with your pick"}
+                  {s.capturing
+                    ? "Saving…"
+                    : pendingCount === 0
+                      ? "click options to select"
+                      : "note saved with these picks"}
                 </span>
               </div>
             </div>

@@ -128,6 +128,7 @@ export async function exportAnnotationPDF(
     const gap = 6;
     const cell = Math.min((gw - (n - 1) * gap) / n, 72);
 
+    const selectedPositions = new Set(p.selections.map((s) => s.position));
     p.options.forEach((o, i) => {
       const r = Math.floor(i / n);
       const c = i % n;
@@ -137,7 +138,7 @@ export async function exportAnnotationPDF(
       if (t) doc.addImage(t, "JPEG", ox, oy, cell, cell);
       else placeholder(ox, oy, cell, cell);
 
-      const sel = o.position === p.selectedPosition;
+      const sel = selectedPositions.has(o.position);
       if (sel) {
         doc.setDrawColor(220, 40, 40);
         doc.setLineWidth(2);
@@ -161,8 +162,12 @@ export async function exportAnnotationPDF(
     doc.setFontSize(9);
     doc.setTextColor(20);
     doc.text(
-      p.selected
-        ? `Selected: position ${p.selectedPosition} · ${p.selected.domain}·${p.selected.class}`
+      p.selections.length > 0
+        ? p.selections.length === 1
+          ? `Selected: position ${p.selections[0].position} · ${p.selections[0].domain}·${p.selections[0].class}`
+          : `Selected: positions ${p.selections
+              .map((s) => s.position)
+              .join(", ")} (${p.selections.length} pairs, pick order)`
         : "Selected: none — player marked 'no good options'",
       margin,
       ty

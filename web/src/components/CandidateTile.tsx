@@ -1,5 +1,6 @@
 // A single candidate image tile. Keyboard-selectable, lazy-loaded, accent ring on
-// hover/selection. Shows its grid position number (1..N²) so notes/reviews can
+// hover; clicking TOGGLES the tile in/out of the round's multi-selection (red
+// ring when picked). Shows its grid position number (1..N²) so notes/reviews can
 // reference it ("image 7 vs your 3") (req 3).
 
 import type { Img } from "../types";
@@ -8,14 +9,14 @@ interface Props {
   img: Img;
   position: number;
   selected?: boolean;
-  onSelect: (id: string) => void;
+  onToggle: (id: string) => void;
 }
 
-export function CandidateTile({ img, position, selected, onSelect }: Props) {
+export function CandidateTile({ img, position, selected, onToggle }: Props) {
   return (
     <button
       type="button"
-      onClick={() => onSelect(img.id)}
+      onClick={() => onToggle(img.id)}
       className={`group relative h-full w-full overflow-hidden rounded-lg border bg-slate-50 outline-none transition focus-visible:ring-2 focus-visible:ring-accent ${
         selected
           ? "border-red-500 ring-2 ring-red-500"

@@ -17,10 +17,12 @@ import type {
   PuzzleOption,
   PuzzleRecord,
   RNG,
+  SelectedOption,
   SessionConfig,
   Split,
 } from "../types";
 import { ALGO_VERSION } from "../types";
+import { upgradeGameRecord } from "../lib/upgrade";
 import { loadManifest, manifestHash } from "../lib/manifest";
 import { generateRound, RECENT_BUFFER } from "../lib/round";
 import { makeRng, randomSeed, uuid } from "../lib/random";
@@ -112,7 +114,10 @@ export interface AppState {
   round: RoundData | null;
   puzzles: PuzzleRecord[];
   screenshots: Screenshot[]; // ordered DOM captures (req 5b)
-  selectedId: string | null; // transient: tile being captured (red ring)
+  // Multi-select (v3): ids toggled on for the CURRENT round, in pick order,
+  // plus each id's toggle-on time. Cleared on submit/advance.
+  pendingSelections: string[];
+  pendingPickedAt: Record<string, string>;
   capturing: boolean; // a screenshot is in flight (blocks new picks)
 
   // Note draft for the current (in-progress) puzzle.
@@ -129,15 +134,17 @@ export interface AppState {
   init: () => Promise<void>;
   setView: (v: AppView) => void;
   newGame: (seedOverride?: number) => void;
-  resumeGame: (game: GameRecord) => { ok: boolean; error?: string; resumed?: number };
+  resumeGame: (raw: unknown) => { ok: boolean; error?: string; resumed?: number };
   setSeedInput: (s: string) => void;
   setGridSize: (n: number) => void;
   setPreset: (preset: PresetName) => void;
   setMode: (mode: ModeId) => void;
   setDomainPairing: (pair: DomainPair) => void;
   nextRound: () => void;
-  recordSelection: (
-    candidateId: string | null
+  toggleSelection: (candidateId: string) => void;
+  // ids in pick order; [] ⇒ the player marked "no good options".
+  recordSelections: (
+    candidateIds: string[]
   ) => { puzzleIndex: number; shouldAdvance: boolean } | null;
   commitScreenshot: (
     puzzleIndex: number,
@@ -216,7 +223,8 @@ export const useStore = create<AppState>((set, get) => ({
   round: null,
   puzzles: [],
   screenshots: [],
-  selectedId: null,
+  pendingSelections: [],
+  pendingPickedAt: {},
   capturing: false,
 
   currentNote: "",
@@ -272,7 +280,8 @@ export const useStore = create<AppState>((set, get) => ({
       recentlyShown: [],
       puzzles: [],
       screenshots: [],
-      selectedId: null,
+      pendingSelections: [],
+      pendingPickedAt: {},
       capturing: false,
       round: null,
       currentNote: "",
@@ -286,12 +295,14 @@ export const useStore = create<AppState>((set, get) => ({
 
   // Resume a saved game: fast-forward the seeded RNG by replaying its recorded
   // rounds, restore the puzzles/counts/freshness, and continue where it left off.
-  resumeGame(game) {
+  // Accepts schema v2 or v3 files (normalized to v3 by upgradeGameRecord).
+  resumeGame(raw) {
     const state = get();
     const manifest = state.manifest;
     if (!manifest) return { ok: false, error: "Manifest not loaded yet." };
-    if (game?.schemaVersion !== 2 || !game.game || !Array.isArray(game.puzzles)) {
-      return { ok: false, error: "Not a valid GRIT game file (schemaVersion 2)." };
+    const game = upgradeGameRecord(raw);
+    if (!game) {
+      return { ok: false, error: "Not a valid GRIT game file (schemaVersion 2 or 3)." };
     }
     const g = game.game;
     const liveHash = state.manifestInfo?.hash ?? "";
@@ -331,8 +342,10 @@ export const useStore = create<AppState>((set, get) => ({
 
     storage.clear();
     for (const p of game.puzzles) storage.add(p);
+    // Quota counts PAIRS (selections), not puzzles — a resumed old game with
+    // noGood puzzles therefore shows a slightly lower count than when saved.
     const counts = emptyCounts();
-    for (const p of game.puzzles) counts[p.mode] = counts[p.mode] + 1;
+    for (const p of game.puzzles) counts[p.mode] = counts[p.mode] + p.selections.length;
     const last = game.puzzles[game.puzzles.length - 1];
 
     set({
@@ -353,7 +366,8 @@ export const useStore = create<AppState>((set, get) => ({
       recentlyShown,
       puzzles: storage.all(),
       screenshots: [], // screenshots aren't in the JSON; new ones start fresh
-      selectedId: null,
+      pendingSelections: [],
+      pendingPickedAt: {},
       capturing: false,
       round: null,
       currentNote: "",
@@ -395,24 +409,56 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   nextRound() {
-    set({ round: makeRound(get()) });
+    // Pending picks refer to the outgoing round — always clear them.
+    set({ round: makeRound(get()), pendingSelections: [], pendingPickedAt: {} });
   },
 
-  // Phase 1 of a pick: record the puzzle (accurate timing), mark the chosen tile
-  // for the screenshot, and DEFER advancing so the capture sees the answered board.
-  recordSelection(candidateId) {
+  // Toggle a candidate in/out of the current round's pending selections.
+  toggleSelection(candidateId) {
+    const state = get();
+    if (state.capturing || !state.round) return;
+    if (!state.round.options.some((c) => c.id === candidateId)) return;
+    if (state.pendingSelections.includes(candidateId)) {
+      const pendingPickedAt = { ...state.pendingPickedAt };
+      delete pendingPickedAt[candidateId];
+      set({
+        pendingSelections: state.pendingSelections.filter((id) => id !== candidateId),
+        pendingPickedAt,
+      });
+    } else {
+      set({
+        pendingSelections: [...state.pendingSelections, candidateId],
+        pendingPickedAt: {
+          ...state.pendingPickedAt,
+          [candidateId]: new Date().toISOString(),
+        },
+      });
+    }
+  },
+
+  // Phase 1 of a submit: record the puzzle (accurate timing) with EVERY picked
+  // candidate ([] ⇒ "no good options"), and DEFER advancing so the screenshot
+  // capture sees the answered board (rings come from pendingSelections).
+  recordSelections(candidateIds) {
     const state = get();
     const { round, mode } = state;
-    if (!round) return null;
+    if (!round || state.capturing) return null;
 
-    // candidateId === null ⇒ the player marked "no good options" (no pair).
-    const noGood = candidateId === null;
-    const idx = noGood
-      ? -1
-      : round.options.findIndex((c) => c.id === candidateId);
-    if (!noGood && idx < 0) return null;
-    const selected = noGood ? null : round.options[idx];
-    const selectedPosition = noGood ? 0 : idx + 1;
+    const noGood = candidateIds.length === 0;
+    const positionById = new Map(round.options.map((img, i) => [img.id, i + 1]));
+    const imgById = new Map(round.options.map((img) => [img.id, img]));
+
+    const selections: SelectedOption[] = [];
+    for (const id of candidateIds) {
+      const img = imgById.get(id);
+      const position = positionById.get(id);
+      if (!img || position === undefined) return null; // stale/foreign id
+      selections.push({
+        ...toRef(img),
+        position,
+        pickedAt: state.pendingPickedAt[id] ?? new Date().toISOString(),
+      });
+    }
     const selectedAtMs = Date.now();
 
     const options: PuzzleOption[] = round.options.map((img, i) => ({
@@ -420,14 +466,26 @@ export const useStore = create<AppState>((set, get) => ({
       position: i + 1,
     }));
 
+    // Per-selection mode scores (empty for cross_domain).
+    const selectionScores: Record<string, Record<string, number>> = {};
+    for (const s of selections) {
+      const sc = round.scoresById[s.id];
+      if (sc && Object.keys(sc).length > 0) selectionScores[s.id] = sc;
+    }
+
+    // Legacy v2 mirrors: the FIRST pick.
+    const first = selections[0] ?? null;
+
     const record: PuzzleRecord = {
       puzzleIndex: storage.count() + 1,
       mode,
       domainPairing: effectivePairing(mode, state.domainPairing),
       anchor: toRef(round.anchor),
       options,
-      selectedPosition,
-      selected: selected ? toRef(selected) : null,
+      selections,
+      selectionScores,
+      selectedPosition: first?.position ?? 0,
+      selected: first ? toRef(imgById.get(first.id)!) : null,
       noGood,
       shownAt: round.shownAtISO,
       selectedAt: new Date(selectedAtMs).toISOString(),
@@ -435,7 +493,7 @@ export const useStore = create<AppState>((set, get) => ({
       reviewFlag: state.currentFlag,
       playerNote: state.currentNote.trim(),
       screenshotIndex: null, // set on commitScreenshot
-      scores: selected ? round.scoresById[selected.id] ?? {} : {},
+      scores: first ? round.scoresById[first.id] ?? {} : {},
     };
     storage.add(record);
 
@@ -447,8 +505,12 @@ export const useStore = create<AppState>((set, get) => ({
     );
     while (recentlyShown.length > RECENT_BUFFER) recentlyShown.shift();
 
-    // Quota.
-    const counts = { ...state.counts, [mode]: state.counts[mode] + 1 };
+    // Quota counts PAIRS: each selection is one (anchor, selection) invariant
+    // pair; "no good options" contributes 0.
+    const counts = {
+      ...state.counts,
+      [mode]: state.counts[mode] + selections.length,
+    };
     const quota = state.session.perModeQuota[mode];
     let showSwitchPrompt = false;
     let switchTo: ModeId | null = null;
@@ -482,8 +544,7 @@ export const useStore = create<AppState>((set, get) => ({
       showSwitchPrompt,
       switchTo,
       sessionComplete,
-      selectedId: candidateId,
-      capturing: true,
+      capturing: true, // pendingSelections stay ringed until the capture commits
     });
 
     return {
@@ -504,7 +565,8 @@ export const useStore = create<AppState>((set, get) => ({
     set({
       screenshots,
       puzzles: storage.all(),
-      selectedId: null,
+      pendingSelections: [],
+      pendingPickedAt: {},
       capturing: false,
     });
     if (shouldAdvance) get().nextRound();
@@ -589,7 +651,7 @@ function buildGameRecord(
   };
 
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     game: {
       gameId: s.gameId,
       sessionId: s.sessionId,

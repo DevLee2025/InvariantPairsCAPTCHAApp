@@ -36,8 +36,12 @@ export function ReviewBoard({ puzzle, gridSize }: Props) {
         </div>
         <div className="max-h-[42%] shrink-0 overflow-auto rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600">
           <div className="font-medium text-slate-800">
-            {puzzle.selected
-              ? `Selected position ${puzzle.selectedPosition} · ${puzzle.selected.domain}·${puzzle.selected.class}`
+            {puzzle.selections.length > 0
+              ? puzzle.selections.length === 1
+                ? `Selected position ${puzzle.selections[0].position} · ${puzzle.selections[0].domain}·${puzzle.selections[0].class}`
+                : `Selected positions ${puzzle.selections
+                    .map((s) => s.position)
+                    .join(", ")} · ${puzzle.selections.length} pairs`
               : "No good option (player rejected all)"}
           </div>
           <div className="mt-1 text-slate-500">
@@ -72,7 +76,9 @@ export function ReviewBoard({ puzzle, gridSize }: Props) {
             }}
           >
             {puzzle.options.map((o) => {
-              const isSel = o.position === puzzle.selectedPosition;
+              const isSel = puzzle.selections.some(
+                (s) => s.position === o.position
+              );
               return (
                 <div
                   key={o.id}

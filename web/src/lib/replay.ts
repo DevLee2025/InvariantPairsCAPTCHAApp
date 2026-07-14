@@ -16,10 +16,12 @@ export interface VerifyResult {
   reason?: string;
 }
 
+// Callers pass records normalized by lib/upgrade.upgradeGameRecord (always v3
+// in memory). Selections play no part here — only anchors/options are replayed.
 export function verifyGame(game: GameRecord, manifest: Manifest): VerifyResult {
   const total = game.puzzles.length;
 
-  if (game.schemaVersion !== 2) {
+  if (game.schemaVersion !== 3) {
     return {
       status: "unavailable",
       checkedPuzzles: 0,
