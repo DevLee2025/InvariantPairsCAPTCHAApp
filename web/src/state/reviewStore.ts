@@ -335,13 +335,15 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   },
 
   // Permanently reveal one puzzle's responses for THIS annotator: record the
-  // timestamp, fetch other annotators' comments, persist the reveal.
+  // timestamp; in shared mode also fetch other annotators' comments and persist
+  // the reveal server-side. Review starts blind in BOTH modes.
   async reveal(puzzleIndex) {
     const s = get();
-    if (s.source !== "shared" || s.revealed[puzzleIndex]) return;
+    if (s.revealed[puzzleIndex]) return;
     set({
       revealed: { ...s.revealed, [puzzleIndex]: new Date().toISOString() },
     });
+    if (get().source !== "shared") return; // local: reveal is view-state only
     try {
       await get().refreshOthers();
       await pushOwn(get);
@@ -535,7 +537,7 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   },
 
   annotatedGame() {
-    const { game, annotations, annotationAt, username, source, revealed } = get();
+    const { game, annotations, annotationAt, username, revealed } = get();
     if (!game) return null;
     const reviewerAnnotations: ReviewerAnnotation[] = Object.entries(annotations)
       .filter(([, comment]) => comment.trim().length > 0)
@@ -546,7 +548,8 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
           comment,
           at: annotationAt[pi] ?? new Date().toISOString(),
           ...(username.trim() ? { annotator: username.trim() } : {}),
-          ...(source === "shared" ? { revealedAt: revealed[pi] ?? null } : {}),
+          // Review is blind in both modes now — reveal provenance always travels.
+          revealedAt: revealed[pi] ?? null,
         };
       });
     return { ...game, reviewerAnnotations };

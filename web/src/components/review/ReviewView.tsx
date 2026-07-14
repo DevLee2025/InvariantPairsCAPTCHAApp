@@ -135,10 +135,26 @@ export function ReviewView() {
   const total = r.game.puzzles.length;
   const v = r.verify;
   const shared = r.source === "shared";
-  const blind = shared && !!puzzle && !r.revealed[puzzle.puzzleIndex];
-  const leakTitle = shared
-    ? "Disabled in shared mode — this filter would leak the player's responses"
+  // Review starts blind in BOTH modes: each puzzle's responses stay hidden
+  // until this annotator reveals it.
+  const blind = !!puzzle && !r.revealed[puzzle.puzzleIndex];
+  const anyBlind = r.game.puzzles.some((p) => !r.revealed[p.puzzleIndex]);
+  const leakTitle = anyBlind
+    ? "Disabled while any puzzle is unrevealed — this filter would leak the player's responses"
     : undefined;
+
+  const onBack = () => {
+    if (
+      !shared &&
+      Object.values(r.annotations).some((c) => c.trim().length > 0) &&
+      !window.confirm(
+        "Go back? Local comments that aren't auto-saved or exported will be lost."
+      )
+    ) {
+      return;
+    }
+    r.reset();
+  };
 
   const onShare = () => {
     const name =
@@ -193,10 +209,11 @@ export function ReviewView() {
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-2">
         <button
           type="button"
-          onClick={() => fileRef.current?.click()}
+          onClick={onBack}
+          title="Back to the start screen (load another JSON or join with a code)"
           className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
         >
-          Load game…
+          ← Back
         </button>
         {r.fileName && (
           <span className="max-w-[180px] truncate text-xs text-slate-400">
@@ -305,39 +322,39 @@ export function ReviewView() {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600">
         <span className="font-medium text-slate-500">Filter (all apply):</span>
         <label
-          className={`flex items-center gap-1.5 ${shared ? "opacity-40" : ""}`}
+          className={`flex items-center gap-1.5 ${anyBlind ? "opacity-40" : ""}`}
           title={leakTitle}
         >
           <input
             type="checkbox"
             checked={r.filters.noGood}
-            disabled={shared}
+            disabled={anyBlind}
             onChange={(e) => r.setFilters({ noGood: e.target.checked })}
             className="h-3.5 w-3.5 accent-slate-600"
           />
           “No good option”
         </label>
         <label
-          className={`flex items-center gap-1.5 ${shared ? "opacity-40" : ""}`}
+          className={`flex items-center gap-1.5 ${anyBlind ? "opacity-40" : ""}`}
           title={leakTitle}
         >
           <input
             type="checkbox"
             checked={r.filters.flagged}
-            disabled={shared}
+            disabled={anyBlind}
             onChange={(e) => r.setFilters({ flagged: e.target.checked })}
             className="h-3.5 w-3.5 accent-slate-600"
           />
           Flagged for review
         </label>
         <label
-          className={`flex items-center gap-1.5 ${shared ? "opacity-40" : ""}`}
+          className={`flex items-center gap-1.5 ${anyBlind ? "opacity-40" : ""}`}
           title={leakTitle}
         >
           <input
             type="checkbox"
             checked={r.filters.commented}
-            disabled={shared}
+            disabled={anyBlind}
             onChange={(e) => r.setFilters({ commented: e.target.checked })}
             className="h-3.5 w-3.5 accent-slate-600"
           />
@@ -376,7 +393,7 @@ export function ReviewView() {
         </select>
         <select
           value={r.filters.selectedDomain}
-          disabled={shared}
+          disabled={anyBlind}
           title={leakTitle}
           onChange={(e) =>
             r.setFilters({ selectedDomain: e.target.value as Domain | "" })
@@ -519,7 +536,7 @@ export function ReviewView() {
           </div>
             </div>
 
-            {shared && (
+            {(blind || shared) && (
               <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2">
                 {blind ? (
                   <button
@@ -528,7 +545,9 @@ export function ReviewView() {
                     title="Permanently reveals this puzzle's responses for you (recorded with a timestamp)"
                     className="w-full rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
                   >
-                    🙈 Show responses — the player’s selection and other annotators’ comments
+                    {shared
+                      ? "Show responses — the player’s selection and other annotators’ comments"
+                      : "Show responses — the player’s selection"}
                   </button>
                 ) : (
                   <div>
