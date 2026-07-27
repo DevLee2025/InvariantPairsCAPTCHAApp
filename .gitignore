@@ -18,6 +18,10 @@ server/data/
 # Per-machine Claude Code permissions
 .claude/settings.local.json
 
+# IRB administrative documents (ignored from git tracking)
+irb/
+
+
 # NOTE: web/.gitignore excludes web/node_modules, web/dist, and the ~148 MB
 # web/public/pacs images + real manifest (rebuilt by pipeline/build_real_manifest.py).
 # pipeline/OTGTests/ and Archive/ ARE tracked on purpose: human-collected game
