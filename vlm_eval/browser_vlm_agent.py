@@ -35,11 +35,17 @@ def run_browser_agent(
     target_json_path = out_dir / "grit-game-vlm-browser-dev.json"
     
     with sync_playwright() as p:
-        # Launch browser in headed mode so the user can watch live interaction
-        browser = p.chromium.launch(headless=not headed, slow_mo=300)
-        page = browser.new_page()
+        browser = p.chromium.launch(
+            headless=not headed,
+            slow_mo=300,
+            args=["--start-maximized", "--window-position=0,0", "--focus-on-new-tab"]
+        )
+        context = browser.new_context(no_viewport=True)
+        page = context.new_page()
         page.goto(app_url)
+        page.bring_to_front()
         page.wait_for_selector("text=Play", timeout=10000)
+
         
         print(f"[Browser] Successfully connected to web application at {app_url}\n")
         time.sleep(1)
