@@ -1,0 +1,4 @@
+# Generated outputs (game JSONs, HF parquet files, verification reports)
+out/
+__pycache__/
+*.pyc
