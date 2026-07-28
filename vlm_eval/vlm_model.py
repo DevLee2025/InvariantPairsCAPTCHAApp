@@ -117,22 +117,21 @@ class VLMEvaluator:
                     sim = float(torch.dot(a_vec, c_vec.squeeze(0)).cpu().numpy())
                     sims.append(sim)
 
-        # Selection heuristic for invariant pairs:
-        # Candidates sharing the same class typically have higher CLIP cosine similarity across domains.
-        # Pick all candidates whose cosine similarity is above a threshold or top quantile.
-        sims_arr = np.array(sims)
-        mean_sim = np.mean(sims_arr)
-        max_sim = np.max(sims_arr)
+        # Refined GRIT Selection Rule:
+        # 1. Floor threshold S_min = 0.32 (filters out cross-class noise ~0.15-0.28).
+        # 2. Hard Cap: Top-3 candidates max (1 <= N <= 3) to prioritize high signal-to-noise ratio.
+        # 3. If no candidate reaches 0.32, return [] (No Good Options).
+        min_floor = 0.32
+        max_cap = 3
         
-        # High-confidence threshold (select candidate options with similarity >= 0.40 or within top 25% of grid)
-        threshold = max(0.35, mean_sim + 0.5 * (max_sim - mean_sim))
-        picks = [i for i, s in enumerate(sims) if s >= threshold]
+        # Filter candidates above floor threshold and sort descending by similarity
+        valid_candidates = [(i, s) for i, s in enumerate(sims) if s >= min_floor]
+        valid_candidates.sort(key=lambda x: x[1], reverse=True)
         
-        # Ensure at least the top 1 matching candidate is picked if any candidate is reasonably positive
-        if not picks and max_sim > 0.25:
-            picks = [int(np.argmax(sims_arr))]
-            
+        # Take Top-3 max
+        picks = [i for i, s in valid_candidates[:max_cap]]
         return picks
+
 
     def _evaluate_vlm(self, anchor: dict, candidates: list) -> List[int]:
         """Prompt VLM to visually compare candidate grid against anchor image."""
