@@ -120,10 +120,11 @@ class VLMEvaluator:
         # Refined Selection Rule:
         # 1. Floor threshold S_min = 0.32: If best similarity < 0.32, return [] (No good options).
         # 2. Always pick the single best option (top 1).
-        # 3. Add secondary options (up to max 3) ONLY IF their similarity >= S_high = 0.50.
+        # 3. Add secondary options (up to max 3) ONLY IF their similarity >= S_high = 0.60.
         min_floor = 0.32
-        s_high = 0.50
+        s_high = 0.60
         max_cap = 3
+
         
         indexed_sims = list(enumerate(sims))
         indexed_sims.sort(key=lambda x: x[1], reverse=True)
