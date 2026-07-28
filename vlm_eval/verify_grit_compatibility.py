@@ -16,13 +16,20 @@ from pathlib import Path
 import subprocess
 import numpy as np
 
-def verify_grit_compatibility(json_path: Path) -> dict:
+def verify_grit_compatibility(json_path: Path, hf_out_dir: Optional[Path] = None) -> dict:
     print(f"\n=======================================================")
     print(f"   VERIFYING GRIT COMPATIBILITY FOR: {json_path.name}")
     print(f"=======================================================\n")
     
+    if hf_out_dir is None:
+        if "browser" in json_path.name.lower():
+            hf_out_dir = Path("vlm_eval/out/browserhf")
+        else:
+            hf_out_dir = Path("vlm_eval/out/hf")
+            
     with open(json_path, "r", encoding="utf-8") as f:
         game_data = json.load(f)
+
         
     schema_ver = game_data.get("schemaVersion", 1)
     puzzles = game_data.get("puzzles", [])
@@ -95,10 +102,8 @@ def verify_grit_compatibility(json_path: Path) -> dict:
             print(f"[SVD Analysis] Top 5 Singular Values: {[round(v, 3) for v in top_singular_values[:5]]}")
             
     # 3. Test conversion to HF Parquet via build_hf_dataset.py
-    hf_out_dir = Path("vlm_eval/out/hf")
-    hf_out_dir.mkdir(parents=True, exist_ok=True)
-    
     print(f"\n[HF Dataset Build] Running build_hf_dataset.py ...")
+
     cmd = [
         "python", "pipeline/build_hf_dataset.py",
         str(json_path),
