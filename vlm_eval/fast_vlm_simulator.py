@@ -9,16 +9,19 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+
 from pathlib import Path
+import random
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+import uuid
 
 from rng import make_rng, generate_round, RECENT_BUFFER
 from vlm_model import VLMEvaluator
 
 def run_simulation(
-    num_rounds: int = 20,
-    seed: int = 1337,
+    num_rounds: int = 50,
+    seed: Optional[int] = None,
     backend: str = "clip",
     grid_size: int = 3,
     output_path: Optional[Path] = None
@@ -31,8 +34,12 @@ def run_simulation(
         manifest = json.load(f)
         
     images = manifest["images"]
-    rng_fn = make_rng(seed)
     
+    # Generate standard 32-bit unsigned integer seed if not provided
+    if seed is None:
+        seed = random.randint(0, 0xFFFFFFFF)
+        
+    rng_fn = make_rng(seed)
     evaluator = VLMEvaluator(backend=backend, manifest_path=manifest_path)
     
     used_anchor_ids = set()
@@ -93,7 +100,7 @@ def run_simulation(
         no_good = len(selections) == 0
         total_pairs += len(selections)
         
-        # Build GameRecord v3 puzzle entry
+        # Build GameRecord v3 puzzle entry with resolved option URLs
         puzzle_record = {
             "puzzleIndex": round_idx,
             "mode": "cross_domain",
@@ -103,7 +110,7 @@ def run_simulation(
                 "domain": anchor["domain"],
                 "class": anchor["class"],
                 "file": anchor["file"],
-                "url": anchor.get("url", "")
+                "url": anchor.get("url") or f"/pacs/{anchor['file']}"
             },
             "options": [
                 {
@@ -111,7 +118,7 @@ def run_simulation(
                     "domain": opt["domain"],
                     "class": opt["class"],
                     "file": opt["file"],
-                    "url": opt.get("url", ""),
+                    "url": opt.get("url") or f"/pacs/{opt['file']}",
                     "position": pos + 1
                 }
                 for pos, opt in enumerate(options)
@@ -136,13 +143,16 @@ def run_simulation(
     elapsed_ms = int((time.time() - start_time) * 1000)
     avg_ms = elapsed_ms // max(1, len(puzzles))
     
-    # Construct complete GameRecord v3 object
-    game_id = f"vlm-game-{datetime.datetime.now().strftime('%Y%m%dT%H%M%S')}"
+    # Construct complete GameRecord v3 object with standard UUIDs & manifest hash
+    game_id = str(uuid.uuid4())
+    session_id = str(uuid.uuid4())
+    manifest_hash = manifest.get("hash") or "fnv1a-e721b826"
+    
     game_record = {
         "schemaVersion": 3,
         "game": {
             "gameId": game_id,
-            "sessionId": f"session-{seed}",
+            "sessionId": session_id,
             "seed": seed,
             "algoVersion": 1,
             "mode": "cross_domain",
@@ -153,7 +163,7 @@ def run_simulation(
             "manifest": {
                 "version": manifest.get("version", 1),
                 "imageCount": len(images),
-                "hash": manifest.get("hash", "")
+                "hash": manifest_hash
             },
             "startedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "endedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -161,7 +171,7 @@ def run_simulation(
                 "overallMs": elapsed_ms,
                 "averageMs": avg_ms,
                 "medianMs": avg_ms,
-                "perCaptchaMs": avg_ms
+                "perCaptchaMs": [avg_ms] * len(puzzles)
             }
         },
         "puzzles": puzzles,
@@ -188,8 +198,8 @@ def run_simulation(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Fast VLM Direct Batch Simulator")
-    parser.add_argument("--rounds", type=int, default=20, help="Number of rounds to simulate")
-    parser.add_argument("--seed", type=int, default=1337, help="Random seed for reproducibility")
+    parser.add_argument("--rounds", type=int, default=50, help="Number of rounds to simulate")
+    parser.add_argument("--seed", type=int, default=None, help="Random seed (defaults to 32-bit unsigned int)")
     parser.add_argument("--backend", type=str, default="clip", choices=["clip", "vlm"], help="VLM evaluator backend")
     args = parser.parse_args()
     

@@ -117,20 +117,30 @@ class VLMEvaluator:
                     sim = float(torch.dot(a_vec, c_vec.squeeze(0)).cpu().numpy())
                     sims.append(sim)
 
-        # Refined GRIT Selection Rule:
-        # 1. Floor threshold S_min = 0.32 (filters out cross-class noise ~0.15-0.28).
-        # 2. Hard Cap: Top-3 candidates max (1 <= N <= 3) to prioritize high signal-to-noise ratio.
-        # 3. If no candidate reaches 0.32, return [] (No Good Options).
+        # Refined Selection Rule:
+        # 1. Floor threshold S_min = 0.32: If best similarity < 0.32, return [] (No good options).
+        # 2. Always pick the single best option (top 1).
+        # 3. Add secondary options (up to max 3) ONLY IF their similarity >= S_high = 0.50.
         min_floor = 0.32
+        s_high = 0.50
         max_cap = 3
         
-        # Filter candidates above floor threshold and sort descending by similarity
-        valid_candidates = [(i, s) for i, s in enumerate(sims) if s >= min_floor]
-        valid_candidates.sort(key=lambda x: x[1], reverse=True)
+        indexed_sims = list(enumerate(sims))
+        indexed_sims.sort(key=lambda x: x[1], reverse=True)
         
-        # Take Top-3 max
-        picks = [i for i, s in valid_candidates[:max_cap]]
+        best_idx, best_sim = indexed_sims[0]
+        if best_sim < min_floor:
+            return []
+            
+        picks = [best_idx]
+        for i, s in indexed_sims[1:]:
+            if len(picks) >= max_cap:
+                break
+            if s >= s_high:
+                picks.append(i)
+                
         return picks
+
 
 
     def _evaluate_vlm(self, anchor: dict, candidates: list) -> List[int]:
