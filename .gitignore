@@ -15,11 +15,17 @@ pipeline/out/
 # Multi-annotator server storage (shared games + per-annotator comments)
 server/data/
 
-# Per-machine Claude Code permissions
+# Per-machine AI settings & permissions
+.claude/
 .claude/settings.local.json
+.gemini/
 
 # IRB administrative documents (ignored from git tracking)
 irb/
+
+# Evaluation outputs
+vlm_eval/out/
+
 
 
 # NOTE: web/.gitignore excludes web/node_modules, web/dist, and the ~148 MB
