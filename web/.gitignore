@@ -5,9 +5,6 @@ dist-ssr
 .DS_Store
 .vite
 
-# Local PACS data built by pipeline/build_real_manifest.py (~190 MB)
-public/pacs/
-public/manifest.json
-public/manifest.json.bak
 # Regenerable analyzer stats (pipeline/build_triplet_stats.py)
 public/triplet_stats.json
+
