@@ -95,19 +95,3 @@ python build_hf_dataset.py <game.json | folder-of-games> [--include-options]
 
 One row per pair, flat columns (no empty structs), `anchor_image` + `selected_image` embedded
 (`--include-options` also embeds all option images). Reads images from `web/public/pacs/`.
-
-## Full ML pipeline (for Modes 2 & 3, when un-paused)
-
-See [`pipeline/README.md`](pipeline/README.md): `01_download_pacs` → `02_compute_clip` →
-`03_train_probes` → `04_build_manifest` (adds CLIP/ERM/mixture probs) → optional `05_upload_cdn`
-for S3+CloudFront hosting at scale.
-
-## Status
-
-- [x] Spec
-- [x] Front-end: Play + Review + Analyzer, seeded/replayable, multi-select (v3), timing, notes, screenshots PDF, annotation PDF (verified live)
-- [x] **Real PACS data** built & served locally
-- [x] ML pipeline run: CLIP embeddings + train-split probes → Modes 2 & 3 live; Analyzer heatmap/ERM
-- [x] Multi-annotator blind Review via share codes (FastAPI, LAN)
-- [x] HuggingFace per-pair parquet export (v2 + v3 games)
-- [ ] Stand up S3+CloudFront for internet-scale hosting
