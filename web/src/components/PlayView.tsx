@@ -107,7 +107,7 @@ export function PlayView() {
       )}
 
       <div className="flex min-h-0 flex-1">
-        <main className="min-w-0 flex-1 overflow-hidden p-4">
+        <main className="min-w-0 flex-1 overflow-y-auto lg:overflow-hidden p-2 sm:p-4">
           {s.loading ? (
             <div className="flex h-full items-center justify-center text-slate-400">
               Loading manifest…
@@ -120,9 +120,10 @@ export function PlayView() {
             <div
               ref={boardRef}
               aria-busy={s.capturing}
-              className="flex h-full min-h-0 flex-col gap-3"
+              className="flex h-full min-h-0 flex-col gap-2 sm:gap-3"
             >
-              <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(220px,340px)_1fr]">
+              <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 sm:gap-4 lg:grid-cols-[minmax(220px,340px)_1fr]">
+
                 <AnchorPanel
                   anchor={s.round?.anchor ?? null}
                   mode={s.mode}
