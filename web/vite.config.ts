@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "./",
   plugins: [react()],
+
   server: {
     watch: {
       // Do NOT watch the ~10k local PACS images / manifest under public/. The file
