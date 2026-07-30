@@ -5,8 +5,9 @@ import type { Img, Manifest } from "../types";
 
 // Real PACS manifest (written by pipeline/build_real_manifest.py). If it's not
 // present yet, we fall back to the committed synthetic dev manifest.
-export const MANIFEST_URL = "/manifest.json";
-export const FALLBACK_MANIFEST_URL = "/manifest.sample.json";
+export const MANIFEST_URL = "./manifest.json";
+export const FALLBACK_MANIFEST_URL = "./manifest.sample.json";
+
 
 type RawImg = Omit<Img, "url">;
 interface RawManifest extends Omit<Manifest, "images"> {
