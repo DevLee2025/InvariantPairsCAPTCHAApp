@@ -41,7 +41,13 @@ def verify_grit_compatibility(json_path: Path, hf_out_dir: Optional[Path] = None
     
     for p in puzzles:
         anchor = p["anchor"]
-        selections = p.get("selections", [])
+        selections = p.get("selections")
+
+        if selections is None:
+            selections = []
+            if not p.get("noGood") and p.get("selected") is not None:
+                selections = [p["selected"]]
+
         for s in selections:
             total_pairs += 1
             is_match = (anchor["class"] == s["class"])
