@@ -15,17 +15,19 @@ import { shuffle } from "./random";
 // Parse "a↔b" into its two domains. The "random" variants return null (the
 // anchor domain is free).
 export function pairDomains(pair: DomainPair): [Domain, Domain] | null {
-  if (pair === "random" || pair === "random_single") return null;
+  if (pair === "random" || pair === "random_single" || pair === "same_domain") return null;
   const [a, b] = pair.split("↔") as [Domain, Domain];
   return [a, b];
 }
 
 // Given the anchor's domain and the active pairing, return the partner domain.
 // "random" / "random_single" → null (any non-anchor domain).
+// "same_domain" → anchorDomain (candidates from the same domain).
 export function partnerDomain(
   pair: DomainPair,
   anchorDomain: Domain
 ): Domain | null {
+  if (pair === "same_domain") return anchorDomain;
   const ds = pairDomains(pair);
   if (!ds) return null;
   const [a, b] = ds;
@@ -36,6 +38,7 @@ export function partnerDomain(
 // only for "random_single", which picks ONE random non-anchor domain per round
 // (so all candidates share a single domain that re-rolls each anchor).
 //   fixed pairing   → the other side
+//   "same_domain"   → the anchor domain itself
 //   "random"        → null (mixed: any non-anchor domain)
 //   "random_single" → one randomly-chosen non-anchor domain
 export function resolvePartner(
@@ -44,6 +47,9 @@ export function resolvePartner(
   anchorDomain: Domain,
   allDomains: Domain[]
 ): Domain | null {
+  if (pair === "same_domain") {
+    return anchorDomain;
+  }
   if (pair === "random_single") {
     const others = allDomains.filter((d) => d !== anchorDomain);
     if (others.length === 0) return null;
@@ -53,7 +59,7 @@ export function resolvePartner(
 }
 
 // Choose the anchor's domain for a round given the active pairing (seeded).
-//   fixed pairing → one of the two sides; random → any of the 4 domains.
+//   fixed pairing → one of the two sides; random / same_domain → any of the 4 domains.
 export function chooseAnchorDomain(
   rng: RNG,
   pair: DomainPair,
@@ -75,7 +81,7 @@ export interface PoolArgs {
 
 // Build a tiered, within-tier-shuffled candidate pool. Taking the first
 // `minNeeded` prefers (1) fresh partner-domain, then (2) any partner-domain
-// (relaxing freshness), then (3) same class in any non-anchor domain.
+// (relaxing freshness), then (3) same class in any domain.
 // Same class throughout ⇒ every option is a valid invariant pair.
 export function buildPool({
   rng,
@@ -113,9 +119,9 @@ export function buildPool({
   }
 
   if (pool.length < minNeeded) {
-    // Tier 3: same class, any non-anchor domain (large grids on small cells).
+    // Tier 3: same class in any domain (fallback for large grids).
     const tier3 = sameClass.filter(
-      (img) => img.domain !== anchor.domain && !have.has(img.id)
+      (img) => !have.has(img.id)
     );
     for (const img of shuffle(rng, tier3)) {
       pool.push(img);
@@ -125,3 +131,4 @@ export function buildPool({
 
   return pool;
 }
+

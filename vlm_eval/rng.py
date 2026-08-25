@@ -44,18 +44,22 @@ def shuffle(rng_fn, arr: list) -> list:
     return out
 
 def pair_domains(pair: str) -> Optional[Tuple[str, str]]:
-    if pair in ("random", "random_single"):
+    if pair in ("random", "random_single", "same_domain"):
         return None
     parts = pair.split("↔")
     return (parts[0], parts[1])
 
 def partner_domain(pair: str, anchor_domain: str) -> Optional[str]:
+    if pair == "same_domain":
+        return anchor_domain
     ds = pair_domains(pair)
     if not ds:
         return None
     return ds[1] if anchor_domain == ds[0] else ds[0]
 
 def resolve_partner(rng_fn, pair: str, anchor_domain: str, all_domains: list) -> Optional[str]:
+    if pair == "same_domain":
+        return anchor_domain
     if pair == "random_single":
         others = [d for d in all_domains if d != anchor_domain]
         if not others:
@@ -86,12 +90,13 @@ def build_pool(rng_fn, anchor: dict, images: list, partner_dom: Optional[str], r
             have.add(img["id"])
             
     if len(pool) < min_needed:
-        tier3 = [img for img in same_class if img["domain"] != anchor["domain"] and img["id"] not in have]
+        tier3 = [img for img in same_class if img["id"] not in have]
         for img in shuffle(rng_fn, tier3):
             pool.append(img)
             have.add(img["id"])
             
     return pool
+
 
 def generate_round(
     rng_fn,

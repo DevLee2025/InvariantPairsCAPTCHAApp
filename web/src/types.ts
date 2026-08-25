@@ -72,6 +72,7 @@ export type DomainPair =
   | "art_painting↔cartoon"
   | "art_painting↔sketch"
   | "cartoon↔sketch"
+  | "same_domain" // anchor any; candidates from the SAME domain as anchor (in-domain)
   | "random" // anchor any; candidates from ANY non-anchor domain (mixed)
   | "random_single"; // anchor any; candidates from ONE random non-anchor domain (re-rolled per round)
 
@@ -82,16 +83,19 @@ export const DOMAIN_PAIRS: DomainPair[] = [
   "art_painting↔cartoon",
   "art_painting↔sketch",
   "cartoon↔sketch",
+  "same_domain",
   "random",
   "random_single",
 ];
 
 // Human-friendly label for the pairing dropdown / strategy panel.
 export function pairingLabel(p: DomainPair): string {
+  if (p === "same_domain") return "Same domain (in-domain)";
   if (p === "random") return "Random (mixed)";
   if (p === "random_single") return "Random (single domain)";
   return p;
 }
+
 
 // ----------------------------------------------------------------------------
 // Seeded RNG (reproducibility). Same seed ⇒ same stream ⇒ same game.

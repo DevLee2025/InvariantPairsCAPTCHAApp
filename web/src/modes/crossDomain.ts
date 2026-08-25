@@ -10,9 +10,10 @@ export const crossDomain: SelectionMode = {
   requiredFields: [],
   blurb: (ctx) =>
     `Uniform random sample of ${ctx.optionCount} same-class candidates from the ` +
-    `partner domain` +
+    (ctx.domainPairing === "same_domain" ? `same domain` : `partner domain`) +
     (ctx.poolSize ? ` (pool of ${ctx.poolSize}).` : `.`) +
     ` No model scores — every valid candidate is equally likely.`,
+
   select(_anchor: Img, pool: Img[], { count }: SelectArgs): SelectionResult {
     const candidates = pool.slice(0, Math.min(count, pool.length));
     const scoresById: Record<string, Record<string, number>> = {};
